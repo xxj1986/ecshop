@@ -1,0 +1,6 @@
+{
+  "require": {
+    "illuminate/database": "^5.3",
+    "illuminate/pagination": "^5.3"
+  }
+}
