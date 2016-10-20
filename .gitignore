@@ -1,3 +1,5 @@
 /cert
 /data
 /temp
+/api/composer.lock
+/api/vendor
