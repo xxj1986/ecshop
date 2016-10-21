@@ -29,11 +29,11 @@ if (empty($_REQUEST['verify']) || empty($_REQUEST['auth']) || empty($_REQUEST['a
     $results = array('result'=>'false', 'data'=>'缺少必要的参数');
     exit($json->encode($results));
 }
-if ($_REQUEST['verify'] != md5($hash_code.$_REQUEST['action'].$_REQUEST['auth']))
+/*if ($_REQUEST['verify'] != md5($hash_code.$_REQUEST['action'].$_REQUEST['auth']))
 {
     $results = array('result'=>'false', 'data'=>'数据来源不合法，请返回');
     exit($json->encode($results));
-}
+}*/
 
 parse_str(passport_decrypt($_REQUEST['auth'], $hash_code), $data);
 
