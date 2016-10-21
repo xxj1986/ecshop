@@ -1,6 +1,9 @@
 {
   "require": {
     "illuminate/database": "^5.3",
-    "illuminate/pagination": "^5.3"
+    "illuminate/pagination": "^5.3",
+    "illuminate/events": "^5.3",
+    "illuminate/http": "^5.3",
+    "gregwar/captcha": "^1.1"
   }
 }
