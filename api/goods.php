@@ -39,13 +39,13 @@ parse_str(passport_decrypt($_REQUEST['auth'], $hash_code), $data);
 
 switch ($action)
 {
-    case 'get_goods_info':
+    case 'get_goods_lists':  //d50e421bceca1020bf455dfa8a4bb4ba
     {
-        $shop_id = isset($data['shop_id'])? intval($data['shop_id']):0;
+        $cat_id = isset($_REQUEST['cat_id'])? $_REQUEST['cat_id']:0;
         $record_number = isset($data['record_number'])? intval($data['record_number']):20;
         $page_number = isset($data['page_number'])? intval($data['page_number']):0;
         $limit = ' LIMIT ' . ($record_number * $page_number) . ', ' . ($record_number+1);
-        $sql = "SELECT `goods_id`, `goods_name`, `goods_number`, `shop_price`, `keywords`, `goods_brief`, `goods_thumb`, `goods_img`, `last_update` FROM " . $ecs->table('goods') . " WHERE `is_delete`='0' ORDER BY `goods_id` ASC $limit ";
+        $sql = "SELECT `goods_id`,`cat_id`, `goods_name`, `goods_number`, `shop_price`, `keywords`, `goods_brief`, `goods_thumb`, `goods_img`, `last_update` FROM " . $ecs->table('goods') . " WHERE `is_delete`='0' AND `cat_id`=$cat_id ORDER BY `goods_id` ASC $limit ";
         $results = array('result' => 'false', 'next' => 'false', 'data' => array());
         $query = $db->query($sql);
         $record_count = 0;
@@ -65,6 +65,35 @@ switch ($action)
             array_pop($results['data']);
             $results['next'] = 'true';
         }
+        exit($json->encode($results));
+        break;
+    }
+    case 'get_goods_info':  //b70d53e63d80cc1bb4e98991e92b5ae4
+    {
+        $goods_id = isset($_REQUEST['id'])? $_REQUEST['id']:0;
+        $cat_id = isset($_REQUEST['cat_id'])? $_REQUEST['cat_id']:0;
+        if($goods_id>0){
+            $sql = "SELECT `goods_id`, `cat_id`,`goods_name`, `goods_number`, `shop_price`, `keywords`, `goods_brief`, `goods_thumb`, `goods_img`, `last_update` FROM " . $ecs->table('goods') . " WHERE `is_delete`='0' AND `goods_id`=$goods_id";
+            //echo $sql;
+            $results = array('result' => 'false', 'next' => 'false', 'data' => array());
+            $query = $db->query($sql);
+            $record_count = 0;
+            while ($goods = $db->fetch_array($query))
+            {
+                $goods['goods_thumb'] = (!empty($goods['goods_thumb']))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods['goods_thumb']:'';
+                $goods['goods_img'] = (!empty($goods['goods_img']))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods['goods_img']:'';
+                $results['data'][] = $goods;
+                $record_count++;
+            }
+            if ($record_count > 0)
+            {
+                $results['result'] = 'true';
+            }
+        }else
+        {
+            $results = array('result'=>'false', 'data'=>'缺少商品ID，无法获取其属性');
+        }
+
         exit($json->encode($results));
         break;
     }
