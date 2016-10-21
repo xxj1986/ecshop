@@ -18,6 +18,9 @@ $database = [
     'prefix'    => 'ecs_',
 ];
 
+define('REDIS_HOST','192.168.2.233');
+define('REDIS_PORT',6379);
+
 $db = new DB;
 
 // 创建链接

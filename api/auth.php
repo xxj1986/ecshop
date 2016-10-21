@@ -25,7 +25,7 @@ class Auth{
             function($res){$this->response($res);};
         //连接redis
         $redis = new Redis();
-        $redis->connect('192.168.2.233',6379);
+        $redis->connect(REDIS_HOST,REDIS_PORT);
         $this->redis = $redis;
 
         //参数路由
