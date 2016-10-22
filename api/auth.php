@@ -33,8 +33,11 @@ class Auth{
     {
         //定义错误消息
         $res = ['errcode'=>1001,'message'=>'参数错误！'];
-        $this->dev = isset($_REQUEST['device'])?trim($_REQUEST['device']):
-            function($res){$this->response($res);};
+        if(isset($_REQUEST['device'])){
+            $this->dev = trim($_REQUEST['device']);
+        }else{
+            $this->response($res);
+        }
         //连接redis
         $redis = new Redis();
         $redis->connect(REDIS_HOST,REDIS_PORT);
