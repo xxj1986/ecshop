@@ -10,6 +10,20 @@ use Illuminate\Http\Request;
 //图片验证码
 use Gregwar\Captcha\CaptchaBuilder;
 
+$auth = new Auth();
+
+//参数路由
+$request = Request::capture();
+$act = $request->input('act');
+switch($act){
+    case 'login': $auth->login($request);          break;
+    case 'logout': $auth->logout($request);        break;
+    case 'register': $auth->register($request);    break;
+    //case 'confirm': $auth->confirm($request);      break;
+    case 'createCaptcha': $auth->createCaptcha();  break;
+    default: $auth->response();
+}
+
 //定义认证类
 class Auth{
     protected $dev; //设备ID
@@ -17,8 +31,6 @@ class Auth{
 
     public function __construct()
     {
-        //捕获输入信息
-        $request = Request::capture();
         //定义错误消息
         $res = ['errcode'=>1001,'message'=>'参数错误！'];
         $this->dev = isset($_REQUEST['device'])?trim($_REQUEST['device']):
@@ -27,24 +39,12 @@ class Auth{
         $redis = new Redis();
         $redis->connect(REDIS_HOST,REDIS_PORT);
         $this->redis = $redis;
-
-        //参数路由
-        $act = $request->input('act');
-        switch($act){
-            case 'login': $this->login($request);          break;
-            case 'logout': $this->logout($request);        break;
-            case 'register': $this->register($request);    break;
-            //case 'confirm': $this->confirm($request);      break;
-            case 'createCaptcha': $this->createCaptcha();  break;
-            default: $this->response();
-        }
-
     }
 
     /*
      * 登录
      */
-    private function login(Request $request){
+    public function login(Request $request){
         //获取用户名和密码
         $user_mobile = $request->input('mobile_phone');
         $password = $request->input('password');
@@ -72,7 +72,7 @@ class Auth{
     /*
      * 退出
      */
-    private function logout(Request $request){
+    public function logout(Request $request){
         //获取签名
         $sign = $request->input('sign');
         if(!$sign){
@@ -85,7 +85,7 @@ class Auth{
         $this->response(['errcode'=>0,'message'=>'退出成功']);
     }
 
-    private function checkSign(Request $request){
+    public function checkSign(Request $request){
 
         //判断是否已经登陆或超时退出
         $token = $this->redis->get('token'.$this->dev);
@@ -109,7 +109,7 @@ class Auth{
     /*
      * 注册
      */
-    private function register(Request $request){
+    public function register(Request $request){
 
         $mobile = $request->input('mobile');
         $password = $request->input('password');
@@ -262,7 +262,5 @@ class Auth{
         die(json_encode($data));
     }
 }
-
-$auth = new Auth();
 
 
