@@ -34,7 +34,7 @@ class Auth{
             case 'login': $this->login($request);          break;
             case 'logout': $this->logout($request);        break;
             case 'register': $this->register($request);    break;
-            case 'confirm': $this->confirm($request);      break;
+            //case 'confirm': $this->confirm($request);      break;
             case 'createCaptcha': $this->createCaptcha();  break;
             default: $this->response();
         }
@@ -111,8 +111,9 @@ class Auth{
      */
     private function register(Request $request){
 
-        $mobile_phone = $request->input('mobile_phone');
+        $mobile = $request->input('mobile');
         $password = $request->input('password');
+        /*
         $captcha = $request->input('captcha');
         //检查验证码
         if(!$captcha){
@@ -121,17 +122,21 @@ class Auth{
         $cap = $this->redis->get('captcha'.$this->dev);
         if($captcha != $cap){
             $this->response(['errcode'=>2009,'message'=>'验证码错误']);
+        }*/
+        $code = $request->input('code');
+        //检查验证码
+        if(!$code){
+            $this->response(['errcode'=>2008,'message'=>'请输入验证码']);
         }
         //检查手机号
-        if(!$mobile_phone){
+        if(!$mobile){
             $this->response(['errcode'=>2004,'message'=>'请输入手机号']);
         }
-        /*
-        $match = '/^((13[0-9])|(15[^4,\d])|(18[0,5-9]))[0-9]{8}$/';
-        if(!preg_match($match, $mobile_phone)){
+        $match = "/1[3458]{1}\d{9}$/";
+        if(!preg_match($match, $mobile)){
             $this->response(['errcode'=>2005,'message'=>'手机号不正确']);
-        }*/
-        $userInfo = DB::table('users')->where('mobile_phone',$mobile_phone)->first();
+        }
+        $userInfo = DB::table('users')->where('mobile_phone',$mobile)->first();
         if($userInfo){
             $this->response(['errcode'=>2006,'message'=>'该手机号已注册']);
         }
@@ -139,14 +144,36 @@ class Auth{
         if(!$password){
             $this->response(['errcode'=>2007,'message'=>'请输入密码']);
         }
+        /*
         // 存redis并设置过期时间
-        $this->redis->set('regMobile'.$this->dev, $mobile_phone);
+        $this->redis->set('regMobile'.$this->dev, $mobile);
         $this->redis->set('regPass'.$this->dev, md5($password));
         $this->redis->expire('regMobile'.$this->dev, 10*60);
         $this->redis->expire('regPass'.$this->dev, 10*60);
 
         //发送短信验证码
         $this->response(['errcode'=>0,'message'=>'提交信息成功']);
+        */
+
+        $data = [
+            'email' => '',
+            'user_name' => str_random(16), //用户名
+            'password' => '', //密码
+            'question' => '',
+            'answer' => '',
+            'last_ip' => '',
+            'alias' => '', //昵称
+            'mobile_phone' => '', //手机号
+            'credit_line' => 800000, // 最大消费
+        ];
+        $data['mobile_phone'] = $mobile;
+        $data['password'] = md5($password);
+        //将信息保存到数据库
+        $res = DB::table('users')->insert($data);
+        if(!$res){
+            $this->response(['errcode'=>2,'message'=>'注册失败']);
+        }
+        $this->response(['errcode'=>0,'message'=>'注册成功']);
     }
 
     /*
@@ -201,11 +228,30 @@ class Auth{
     }
 
     /*
+     * 创建短信验证码
+     */
+    public function createSmsCode(){
+        //
+    }
+
+    /*
      * 检测手机号
      */
-    public function checkMobile($mobile){
-        //考虑到安全，该接口暂时不开放。
-        // 非法用户可能根据这个接口来探测注册的手机号。
+    public function checkMobile(Request $request){
+        $mobile = $request->input('mobile');
+        //检查手机号
+        if(!$mobile){
+            $this->response(['errcode'=>2004,'message'=>'请输入手机号']);
+        }
+        $match = "/1[3458]{1}\d{9}$/";
+        if(!preg_match($match, $mobile)){
+            $this->response(['errcode'=>2005,'message'=>'手机号不正确']);
+        }
+        $userInfo = DB::table('users')->where('mobile_phone',$mobile)->first();
+        if($userInfo){
+            $this->response(['errcode'=>2006,'message'=>'该手机号已注册']);
+        }
+        $this->response(['errcode'=>0,'message'=>'该手机号可以注册']);
     }
 
     /*
