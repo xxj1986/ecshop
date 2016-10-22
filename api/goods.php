@@ -16,205 +16,273 @@
 
 define('IN_ECS', true);
 
-require('./init.php');
-require_once(ROOT_PATH . 'includes/cls_json.php');
+// 载入初始化文件
+include __DIR__ . '/aip_init.php';
 
-$json = new JSON;
+//数据库ORM
+use Illuminate\Database\Capsule\Manager as DB;
+//输入过滤器
+use Illuminate\Http\Request;
+//图片验证码
+use Gregwar\Captcha\CaptchaBuilder;
 
-$hash_code = $db->getOne("SELECT `value` FROM " . $ecs->table('shop_config') . " WHERE `code`='hash_code'", true);
-
-$action = isset($_REQUEST['action'])? $_REQUEST['action']:'';
-if (empty($_REQUEST['verify']) || empty($_REQUEST['auth']) || empty($_REQUEST['action']))
+//定义认证类
+class Goods
 {
-    $results = array('result'=>'false', 'data'=>'缺少必要的参数');
-    exit($json->encode($results));
-}
-if ($_REQUEST['verify'] != md5($hash_code.$_REQUEST['action'].$_REQUEST['auth']))
-{
-    $results = array('result'=>'false', 'data'=>'数据来源不合法，请返回');
-    exit($json->encode($results));
-}
+    protected $dev; //设备ID
+    protected $redis;
 
-parse_str(passport_decrypt($_REQUEST['auth'], $hash_code), $data);
-
-switch ($action)
-{
-    case 'get_goods_lists':  //d50e421bceca1020bf455dfa8a4bb4ba
+    public function __construct()
     {
-        $cat_id = isset($_REQUEST['cat_id'])? $_REQUEST['cat_id']:0;
-        $record_number = isset($data['record_number'])? intval($data['record_number']):20;
-        $page_number = isset($data['page_number'])? intval($data['page_number']):0;
-        $limit = ' LIMIT ' . ($record_number * $page_number) . ', ' . ($record_number+1);
-        $sql = "SELECT `goods_id`,`cat_id`, `goods_name`, `goods_number`, `shop_price`, `keywords`, `goods_brief`, `goods_thumb`, `goods_img`, `last_update` FROM " . $ecs->table('goods') . " WHERE `is_delete`='0' AND `cat_id`=$cat_id ORDER BY `goods_id` ASC $limit ";
-        $results = array('result' => 'false', 'next' => 'false', 'data' => array());
-        $query = $db->query($sql);
-        $record_count = 0;
-        while ($goods = $db->fetch_array($query))
-        {
-            $goods['goods_thumb'] = (!empty($goods['goods_thumb']))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods['goods_thumb']:'';
-            $goods['goods_img'] = (!empty($goods['goods_img']))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods['goods_img']:'';
-            $results['data'][] = $goods;
-            $record_count++;
+        //捕获输入信息
+        $request = Request::capture();
+        //定义错误消息
+        //$this->dev = isset($_REQUEST['device']) ? trim($_REQUEST['device']):function ($res) {$this->response($res);};
+        //连接redis
+        //$redis = new Redis();
+        //$redis->connect(REDIS_HOST, REDIS_PORT);
+        //$this->redis = $redis;
+
+        //参数路由
+        $act = $request->input('act');
+        switch ($act) {
+            case 'get_goods_lists':
+                $this->get_goods_lists($request);
+                break;
+            case 'get_goods_info':
+                $this->get_goods_info($request);
+                break;
+            case 'get_search':
+                $this->get_search($request);
+                break;
+            case 'get_goods_attribute':
+                $this->get_goods_attribute($request);
+                break;
+            default:
+                $this->response();
         }
-        if ($record_count > 0)
-        {
-            $results['result'] = 'true';
-        }
-        if ($record_count > $record_number)
-        {
-            array_pop($results['data']);
-            $results['next'] = 'true';
-        }
-        exit($json->encode($results));
-        break;
     }
-    case 'get_goods_info':  //b70d53e63d80cc1bb4e98991e92b5ae4
-    {
-        $goods_id = isset($_REQUEST['id'])? $_REQUEST['id']:0;
-        $cat_id = isset($_REQUEST['cat_id'])? $_REQUEST['cat_id']:0;
+
+
+    /*
+     * 获取产品列表信息
+     */
+    private function get_goods_lists(Request $request){
+        $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
+        $record_number = $request->input('record_number')?$request->input('record_number'):20;
+        $page_number = $request->input('page_number')?$request->input('page_number'):0;
+        /*$users = DB::table('users')
+            ->join('contacts', 'users.id', '=', 'contacts.user_id')
+            ->join('orders', 'users.id', '=', 'orders.user_id')
+            ->select('users.*', 'contacts.phone', 'orders.price')
+            ->orderBy('name', 'desc')
+            ->skip(10)->take(5)  // 要限制查找所返回的结果数量，或略过指定数量的查找结果（偏移），则可使用 skip 和 take 方法：
+            ->get();   //first() 只取一条
+        若你不想取出完整的一行，则可以使用 value 方法来从单条记录中取出单个值。这个方法会直接返回字段的值：
+        $email = DB::table('users')->where('name', 'John')->value('email');
+        $user = DB::table('users')->where('name', 'John')->first();
+        echo $user->name;*/
+        $goods_list = DB::table('goods')
+            ->where('is_delete',0)
+            ->where('cat_id',$cat_id)
+            ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
+            ->orderBy('goods_id','ASC')
+            ->skip($record_number * $page_number)->take($record_number+1)
+            ->get();
+
+        //print_r($goods_list);
+        if($goods_list){
+            $res['errcode'] = '0';
+            $res['message'] = '商品列表获取成功';
+            $datas = array();
+            foreach ($goods_list as $goods)
+            {
+                //echo $goods->goods_name;
+                $data['goods_thumb'] = (!empty($goods->goods_thumb))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$goods->goods_thumb:'';
+                $data['goods_img'] = (!empty($goods->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $goods->goods_img:'';
+                $data['shop_price']  = $goods->shop_price;
+                $data['goods_name']  = $goods->goods_name;
+                $data['cat_id']  = $goods->cat_id;
+                $data['goods_number']  = $goods->goods_number;
+                $datas[] = $data;
+            }
+            //print_r($datas);
+            $res['data'] = $datas;
+        }else{
+            $res['errcode'] = '1001';
+            $res['message'] = '商品列表获取失败！';
+            $res['data'] = [];
+        }
+        $this->response($res);
+    }
+
+    /**
+     * 获取商品信息
+     */
+    private function get_goods_info(Request $request){
+        $goods_id = $request->input('id')?$request->input('id'):0;
         if($goods_id>0){
-            $sql = "SELECT `goods_id`, `cat_id`,`goods_name`, `goods_number`, `shop_price`, `keywords`, `goods_brief`, `goods_thumb`, `goods_img`, `last_update` FROM " . $ecs->table('goods') . " WHERE `is_delete`='0' AND `goods_id`=$goods_id";
-            //echo $sql;
-            $results = array('result' => 'false', 'next' => 'false', 'data' => array());
-            $query = $db->query($sql);
-            $record_count = 0;
-            while ($goods = $db->fetch_array($query))
-            {
-                $goods['goods_thumb'] = (!empty($goods['goods_thumb']))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods['goods_thumb']:'';
-                $goods['goods_img'] = (!empty($goods['goods_img']))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods['goods_img']:'';
-                $results['data'][] = $goods;
-                $record_count++;
+            $goods = DB::table('goods')
+                ->where('is_delete',0)
+                ->where('goods_id',$goods_id)
+                ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
+                ->first();
+            //print_r($goods);
+            if($goods){
+                $res['errcode'] = '0';
+                $res['message'] = '商品信息获取成功';
+                $info['goods_thumb'] = (!empty($goods->goods_thumb))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_thumb:'';
+                $info['goods_img'] = (!empty($goods->goods_img))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_img:'';
+                $info['shop_price']  = $goods->shop_price;
+                $info['goods_name']  = $goods->goods_name;
+                $info['cat_id']  = $goods->cat_id;
+                $info['goods_number']  = $goods->goods_number;
+                $res['data'] = $info;
+            }else{
+                $res['errcode'] = '1001';
+                $res['message'] = '获取商品信息失败！';
+                $res['data'] = [];
             }
-            if ($record_count > 0)
-            {
-                $results['result'] = 'true';
+        }else {
+            $res['errcode'] = '1002';
+            $res['message'] = '商品信息有误！';
+            $res['data'] = [];
+        }
+        $this->response($res);
+    }
+
+    /**
+     * 获取商品对应的属性信息
+     */
+    private function get_goods_attribute(Request $request){
+        $goods_id = $request->input('id')?$request->input('id'):0;
+        if ($goods_id>0) {
+            $attrs = DB::table('goods_attr')
+                ->where('goods_id',$goods_id)
+                ->select('goods_id','attr_id','attr_value','attr_price')
+                ->get();
+            //print_r($goods);
+            if($attrs){
+                $res['errcode'] = '0';
+                $res['message'] = '获取商品属性信息成功！';
+                $res['data'] = $attrs;
+            }else{
+                $res['errcode'] = '1001';
+                $res['message'] = '获取商品属性信息失败！';
+                $res['data'] = [];
             }
-        }else
-        {
-            $results = array('result'=>'false', 'data'=>'缺少商品ID，无法获取其属性');
+        } else {
+            $res['errcode'] = '1002';
+            $res['message'] = '商品信息有误！';
+            $res['data'] = [];
         }
+        $this->response($res);
+    }
 
-        exit($json->encode($results));
-        break;
-    }
-    case 'get_shop_info':
-    {
-        $results = array('result' => 'true', 'data' => array());
-        $sql = "SELECT `value` FROM " . $ecs->table('shop_config') . " WHERE code='shop_name'";
-        $shop_name = $db->getOne($sql);
-        $sql = "SELECT `value` FROM " . $ecs->table('shop_config') . " WHERE code='currency_format'";
-        $currency_format = $db->getOne($sql);
-        $sql = "SELECT r.region_name, sc.value FROM " . $ecs->table('region') . " AS r INNER JOIN " . $ecs->table('shop_config') . " AS sc ON r.`region_id`=sc.`value` WHERE sc.`code`='shop_country' OR sc.`code`='shop_province' OR sc.`code`='shop_city' ORDER BY sc.`id` ASC";
+    /**
+     * 获取商品对应的属性信息
+     */
+    private function get_search(Request $request){
+        $goods_name = $request->input('name')?$request->input('name'):'红酒';
 
-        $shop_region = $db->getAll($sql);
-        $results['data'] = array
-        (
-            'shop_name' => $shop_name,
-            'domain' => 'http://' . $_SERVER['SERVER_NAME'] . '/',
-            'shop_region' => $shop_region[0]['region_name'] . ' ' . $shop_region[1]['region_name'] . ' ' . $shop_region[2]['region_name'],
-            'currency_format' => $currency_format
-        );
-        exit($json->encode($results));
-        break;
-    }
-    case 'get_shipping':
-    {
-        $results = array('result' => 'false', 'data' => array());
-        $sql = "SELECT `shipping_id`, `shipping_name`, `insure` FROM " . $ecs->table('shipping');
-        $result = $db->getAll($sql);
-        if (!empty($result))
-        {
-            $results['result'] = 'true';
-            $results['data'] = $result;
-        }
-        exit($json->encode($results));
-        break;
-    }
-    case 'get_goods_attribute':
-    {
-        $results = array('result' => 'false', 'data' => array());
-        $goods_id = isset($data['goods_id'])? intval($data['goods_id']):0;
-        if (!empty($goods_id))
-        {
-            $sql = "SELECT t2.attr_name, t1.attr_value FROM " . $ecs->table('goods_attr') . " AS t1 LEFT JOIN " . $ecs->table('attribute') . " AS t2 ON t1.attr_id=t2.attr_id WHERE t1.goods_id='$goods_id'";
-            $result = $db->getAll($sql);
-            if (!empty($result))
-            {
-                $results['result'] = 'true';
-                $results['data'] = $result;
+        $attrs = DB::table('goods')
+            ->where('goods_name','like','%'.$goods_name.'%')  //where('name', 'like', 'T%')
+            ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
+            ->orderBy('goods_id','ASC')
+            ->take(30)
+            ->get();
+        //print_r($attrs);
+        if($attrs){
+            $datas = [];
+            foreach($attrs as $attr){
+                $res['errcode'] = '0';
+                $res['message'] = '获取商品属性信息成功！';
+                $data['goods_thumb'] = (!empty($attr->goods_thumb))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$attr->goods_thumb:'';
+                $data['goods_img'] = (!empty($attr->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $attr->goods_img:'';
+                $data['shop_price']  = $attr->shop_price;
+                $data['goods_name']  = $attr->goods_name;
+                $data['cat_id']  = $attr->cat_id;
+                $data['goods_number']  = $attr->goods_number;
+                $datas[] = $data;
             }
+            $res['data'] = $datas;
+        }else{
+            $res['errcode'] = '1001';
+            $res['message'] = '获取商品属性信息失败！';
+            $res['data'] = [];
         }
-        else
+        $this->response($res);
+    }
+
+
+    /*
+     * 输出函数
+     */
+    public function response($res=['errcode'=>1002,'message'=>'action not found','data'=>[]]){
+        header('Content-type:text/json');
+        die(json_encode($res));
+    }
+
+    /**
+     * 解密函数
+     *
+     * @param string $txt
+     * @param string $key
+     * @return string
+     */
+    public function passport_decrypt($txt, $key)
+    {
+        $txt = passport_key(base64_decode($txt), $key);
+        $tmp = '';
+        for ($i = 0;$i < strlen($txt); $i++) {
+            $md5 = $txt[$i];
+            $tmp .= $txt[++$i] ^ $md5;
+        }
+        return $tmp;
+    }
+
+    /**
+     * 加密函数
+     *
+     * @param string $txt
+     * @param string $key
+     * @return string
+     */
+    public function passport_encrypt($txt, $key)
+    {
+        srand((double)microtime() * 1000000);
+        $encrypt_key = md5(rand(0, 32000));
+        $ctr = 0;
+        $tmp = '';
+        for($i = 0; $i < strlen($txt); $i++ )
         {
-            $results = array('result'=>'false', 'data'=>'缺少商品ID，无法获取其属性');
+            $ctr = $ctr == strlen($encrypt_key) ? 0 : $ctr;
+            $tmp .= $encrypt_key[$ctr].($txt[$i] ^ $encrypt_key[$ctr++]);
         }
-        exit($json->encode($results));
-        break;
+        return base64_encode(passport_key($tmp, $key));
     }
-    default:
+
+    /**
+     * 编码函数
+     *
+     * @param string $txt
+     * @param string $encrypt_key
+     * @return string
+     */
+    public function passport_key($txt, $encrypt_key)
     {
-        $results = array('result'=>'false', 'data'=>'缺少动作');
-        exit(json_encode($results));
-        break;
+        $encrypt_key = md5($encrypt_key);
+        $ctr = 0;
+        $tmp = '';
+        for($i = 0; $i < strlen($txt); $i++)
+        {
+            $ctr = $ctr == strlen($encrypt_key) ? 0 : $ctr;
+            $tmp .= $txt[$i] ^ $encrypt_key[$ctr++];
+        }
+        return $tmp;
     }
 }
 
-/**
- * 解密函数
- *
- * @param string $txt
- * @param string $key
- * @return string
- */
-function passport_decrypt($txt, $key)
-{
-    $txt = passport_key(base64_decode($txt), $key);
-    $tmp = '';
-    for ($i = 0;$i < strlen($txt); $i++) {
-        $md5 = $txt[$i];
-        $tmp .= $txt[++$i] ^ $md5;
-    }
-    return $tmp;
-}
+$Goods = new Goods();
 
-/**
- * 加密函数
- *
- * @param string $txt
- * @param string $key
- * @return string
- */
-function passport_encrypt($txt, $key)
-{
-    srand((double)microtime() * 1000000);
-    $encrypt_key = md5(rand(0, 32000));
-    $ctr = 0;
-    $tmp = '';
-    for($i = 0; $i < strlen($txt); $i++ )
-    {
-        $ctr = $ctr == strlen($encrypt_key) ? 0 : $ctr;
-        $tmp .= $encrypt_key[$ctr].($txt[$i] ^ $encrypt_key[$ctr++]);
-    }
-    return base64_encode(passport_key($tmp, $key));
-}
-
-/**
- * 编码函数
- *
- * @param string $txt
- * @param string $key
- * @return string
- */
-function passport_key($txt, $encrypt_key)
-{
-    $encrypt_key = md5($encrypt_key);
-    $ctr = 0;
-    $tmp = '';
-    for($i = 0; $i < strlen($txt); $i++)
-    {
-        $ctr = $ctr == strlen($encrypt_key) ? 0 : $ctr;
-        $tmp .= $txt[$i] ^ $encrypt_key[$ctr++];
-    }
-    return $tmp;
-}
 ?>
