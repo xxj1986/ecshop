@@ -9,11 +9,12 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 $database = [
     'driver'    => 'mysql',
-    'host'      => '192.168.2.233', //192.168.2.233  127.0.0.1
+    //'host'      => '192.168.2.233',
+    'host'      => '127.0.0.1',
     'database'  => 'ecshop',
     'username'  => 'root',
-    //'password'  => 'link@w1nd0ws',
-    'password' =>'DNY!2#$%^&*9*&^%$#@!DNY',
+    'password'  => 'link@w1nd0ws',
+    //'password' =>'DNY!2#$%^&*9*&^%$#@!DNY',
     'charset'   => 'utf8',
     'collation' => 'utf8_unicode_ci',
     'prefix'    => 'ecs_',
