@@ -2,3 +2,4 @@
 /images
 /api/composer.lock
 /api/vendor
+.idea/
