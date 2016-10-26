@@ -176,7 +176,7 @@ class Auth{
         if(!$res){
             $this->response(['errcode'=>2,'message'=>'注册失败']);
         }
-        $this->response(['errcode'=>0,'message'=>'注册成功']);
+        $this->response(['errcode'=>200,'message'=>'注册成功']);
     }
 
     /*
@@ -213,7 +213,7 @@ class Auth{
         if(!$res){
             $this->response(['errcode'=>2,'message'=>'注册失败']);
         }
-        $this->response(['errcode'=>0,'message'=>'注册成功']);
+        $this->response(['errcode'=>200,'message'=>'注册成功']);
     }
 
     /*
@@ -233,8 +233,9 @@ class Auth{
     /*
      * 创建短信验证码
      */
-    public function createSmsCode(){
-        //
+    public function createSmsCode(Request $request){
+        $mobile = $request->input('mobile');
+        $this->response(['errcode'=>200,'message'=>'该功能暂时没有实现，请随意填写个手机验证码']);
     }
 
     /*
@@ -254,7 +255,7 @@ class Auth{
         if($userInfo){
             $this->response(['errcode'=>2006,'message'=>'该手机号已注册']);
         }
-        $this->response(['errcode'=>0,'message'=>'该手机号可以注册']);
+        $this->response(['errcode'=>200,'message'=>'该手机号可以注册']);
     }
 
     /*

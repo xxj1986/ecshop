@@ -1,7 +1,4 @@
-/cert
-/data
-/temp
+/data/config.php
 /images
-/includes
 /api/composer.lock
 /api/vendor
