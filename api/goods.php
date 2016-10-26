@@ -92,7 +92,7 @@ class Goods
 
         //print_r($goods_list);
         if($goods_list){
-            $res['errcode'] = '0';
+            $res['errcode'] = '200';
             $res['message'] = '商品列表获取成功';
             $datas = array();
             foreach ($goods_list as $goods)
@@ -129,7 +129,7 @@ class Goods
                 ->first();
             //print_r($goods);
             if($goods){
-                $res['errcode'] = '0';
+                $res['errcode'] = '200';
                 $res['message'] = '商品信息获取成功';
                 $info['goods_thumb'] = (!empty($goods->goods_thumb))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_thumb:'';
                 $info['goods_img'] = (!empty($goods->goods_img))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_img:'';
@@ -163,7 +163,7 @@ class Goods
                 ->get();
             //print_r($goods);
             if($attrs){
-                $res['errcode'] = '0';
+                $res['errcode'] = '200';
                 $res['message'] = '获取商品属性信息成功！';
                 $res['data'] = $attrs;
             }else{
@@ -195,7 +195,7 @@ class Goods
         if($attrs){
             $datas = [];
             foreach($attrs as $attr){
-                $res['errcode'] = '0';
+                $res['errcode'] = '200';
                 $res['message'] = '获取商品属性信息成功！';
                 $data['goods_thumb'] = (!empty($attr->goods_thumb))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$attr->goods_thumb:'';
                 $data['goods_img'] = (!empty($attr->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $attr->goods_img:'';
@@ -218,7 +218,7 @@ class Goods
     /*
      * 输出函数
      */
-    public function response($res=['errcode'=>1002,'message'=>'action not found','data'=>[]]){
+    public function response($res=['errcode'=>2001,'message'=>'action not found','data'=>[]]){
         header('Content-type:text/json');
         die(json_encode($res));
     }

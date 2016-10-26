@@ -31,7 +31,7 @@ class Order
         //$redis = new Redis();
         //$redis->connect(REDIS_HOST, REDIS_PORT);
         //$this->redis = $redis;
-
+        //echo $request->method();
         //参数路由
         $act = $request->input('act');
         switch ($act) {
@@ -81,7 +81,7 @@ class Order
                     ]
                 );
                 if ($id) {
-                    $res['errcode'] = '0';
+                    $res['errcode'] = '200';
                     $res['message'] = '添加购物车成功！';
                     $res['data'] = [];
                 } else {
@@ -121,7 +121,7 @@ class Order
                     $data[] = $cart;
                 }
                 if(count($data)>0){
-                    $res['errcode'] = 0;
+                    $res['errcode'] = '200';
                     $res['message'] = '获取购物车信息成功！';
                 }else{
                     $res['errcode'] = '1001';
@@ -154,7 +154,7 @@ class Order
                 ->get();
             //print_r($goods);
             if ($attrs) {
-                $res['errcode'] = '0';
+                $res['errcode'] = '200';
                 $res['message'] = '获取商品属性信息成功！';
                 $res['data'] = $attrs;
             } else {
@@ -210,7 +210,7 @@ class Order
     /*
      * 输出函数
      */
-    public function response($res = ['errcode' => 1002, 'message' => 'action not found', 'data' => []])
+    public function response($res = ['errcode' => '2001', 'message' => 'action not found', 'data' => []])
     {
         header('Content-type:text/json');
         die(json_encode($res));
