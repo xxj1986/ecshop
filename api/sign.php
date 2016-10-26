@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 //定义认证类
 class Sign{
     protected $dev; //设备ID
+    protected $sign; //数字签名
     protected $redis;
 
     public function __construct()
@@ -16,15 +17,22 @@ class Sign{
         $redis = new Redis();
         $redis->connect(REDIS_HOST,REDIS_PORT);
         $this->redis = $redis;
+
+        //捕获输入信息
+        $request = Request::capture();
+        $this->dev = $request->input('device');
+
+        //检查数字签名
+        //$this->sign = $request->input('sign');
+        //$this->checkSign($request);
+
+        //更新过期时间
+        $this->redis->expire('token'.$this->dev, 20*60);
     }
     /*
      * 验证
      */
-    public function checkSign(){
-        //捕获输入信息
-        $request = Request::capture();
-        $dev = $request->input('device');
-        $sign = $request->input('sign');
+    public function checkSign(Request $request){
         /*
          * App登录互斥
          * 说明：如果传输了user_id,一个账户只能在一个设备登录
@@ -33,15 +41,15 @@ class Sign{
         $user_id = intval($request->input('user_id'));
         if($user_id){
             $onlineDev = $this->redis->hget('id2dev',$user_id);
-            if($dev !== $onlineDev){
+            if($this->dev !== $onlineDev){
                 $this->response(['errcode'=>1,'message'=>'您已在其他设备登录']);
             }
         }
-        if(!$dev || !$sign){
+        if(!$this->dev || !$this->sign){
             $this->response(['errcode'=>1001,'message'=>'参数错误！']);
         }
         //判断是否已经登陆或超时退出
-        $token = $this->redis->get('token'.$dev);
+        $token = $this->redis->get('token'.$this->dev);
         if(!$token || strlen($token) != 32){
             $this->response(['errcode'=>2001,'message'=>'请重新登录']);
         }
@@ -53,11 +61,9 @@ class Sign{
         $str = implode('&',$data); // 序列化
         $correctSign = md5($str); // md5哈希
         //判断签名
-        if($sign != $correctSign){
+        if($this->sign != $correctSign){
             $this->response(['errcode'=>1,'message'=>'数字签名错误！']);
         }
-        //更新过期时间
-        $this->redis->expire('token'.$dev, 20*60);
     }
 
     /*
