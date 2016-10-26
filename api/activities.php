@@ -82,6 +82,21 @@ class Activities extends Sign{
         }
         $this->response($data);
     }
+
+    /*
+     * 取消报名
+     */
+    public function cancel(Request $request){
+        $active_id = intval($request->input('active_id'));
+        $user_id = intval($request->input('user_id'));
+        $res = DB::table('activity_users')->where(['active_id'=>$active_id,'user_id'=>$active_id])->delete();
+        if($res){
+            $data = ['errcode' => 200, 'message' => '取消报名成功', 'data'=>[] ];
+        }else{
+            $data = ['errcode' => 500, 'message' => '取消报名失败', 'data'=>[] ];
+        }
+        $this->response($data);
+    }
 }
 
 $activities = new Activities();
