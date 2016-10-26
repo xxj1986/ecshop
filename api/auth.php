@@ -19,7 +19,7 @@ switch($act){
     case 'login': $auth->login($request);          break;
     case 'logout': $auth->logout($request);        break;
     case 'register': $auth->register($request);    break;
-    //case 'confirm': $auth->confirm($request);      break;
+    case 'createSmsCode': $auth->createSmsCode($request);      break;
     case 'createCaptcha': $auth->createCaptcha();  break;
     default: $auth->response();
 }
