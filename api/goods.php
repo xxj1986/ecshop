@@ -184,7 +184,6 @@ class Goods
      */
     private function get_search(Request $request){
         $goods_name = $request->input('name')?$request->input('name'):'红酒';
-
         $attrs = DB::table('goods')
             ->where('goods_name','like','%'.$goods_name.'%')  //where('name', 'like', 'T%')
             ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
