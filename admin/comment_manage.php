@@ -224,10 +224,11 @@ if ($_REQUEST['act']=='action')
 /*------------------------------------------------------ */
 if ($_REQUEST['act'] == 'check')
 {
+    $id = intval($_REQUEST['id']);
     if ($_REQUEST['check'] == 'allow')
     {
         /* 允许评论显示 */
-        $sql = "UPDATE " .$ecs->table('comment'). " SET status = 1 WHERE comment_id = '$_REQUEST[id]'";
+        $sql = "UPDATE " .$ecs->table('comment'). " SET status = 1 WHERE comment_id = $id";
         $db->query($sql);
 
         //add_feed($_REQUEST['id'], COMMENT_GOODS);
@@ -235,19 +236,19 @@ if ($_REQUEST['act'] == 'check')
         /* 清除缓存 */
         clear_cache_files();
 
-        ecs_header("Location: comment_manage.php?act=reply&id=$_REQUEST[id]\n");
+        ecs_header("Location: comment_manage.php?act=reply&id=$id\n");
         exit;
     }
     else
     {
         /* 禁止评论显示 */
-        $sql = "UPDATE " .$ecs->table('comment'). " SET status = 0 WHERE comment_id = '$_REQUEST[id]'";
+        $sql = "UPDATE " .$ecs->table('comment'). " SET status = 0 WHERE comment_id = $id";
         $db->query($sql);
 
         /* 清除缓存 */
         clear_cache_files();
 
-        ecs_header("Location: comment_manage.php?act=reply&id=$_REQUEST[id]\n");
+        ecs_header("Location: comment_manage.php?act=reply&id=$id\n");
         exit;
     }
 }
@@ -261,11 +262,11 @@ elseif ($_REQUEST['act'] == 'remove')
 
     $id = intval($_GET['id']);
 
-    $sql = "DELETE FROM " .$ecs->table('comment'). " WHERE comment_id = '$id'";
+    $sql = "DELETE FROM " .$ecs->table('comment'). " WHERE comment_id = $id";
     $res = $db->query($sql);
     if ($res)
     {
-        $db->query("DELETE FROM " .$ecs->table('comment'). " WHERE parent_id = '$id'");
+        $db->query("DELETE FROM " .$ecs->table('comment'). " WHERE parent_id = $id");
     }
 
     admin_log('', 'remove', 'ads');
@@ -333,8 +334,10 @@ function get_comment_list()
     {
         $filter['keywords'] = json_str_iconv($filter['keywords']);
     }
-    $filter['sort_by']      = empty($_REQUEST['sort_by']) ? 'add_time' : trim($_REQUEST['sort_by']);
-    $filter['sort_order']   = empty($_REQUEST['sort_order']) ? 'DESC' : trim($_REQUEST['sort_order']);
+
+    $exp = "/^[a-zA-Z0-9_]$/"; //验证是否符合字段名 字符+数字+下划线
+    $filter['sort_by']      = empty($_REQUEST['sort_by']) ? 'add_time' : preg_match($exp,trim($_REQUEST['sort_by']))?trim($_REQUEST['sort_by']):'add_time';
+    $filter['sort_order']   = empty($_REQUEST['sort_order']) ? 'DESC' : strtoupper(trim($_REQUEST['sort_order']))=='ASC'?'ASC':'DESC';
 
     $where = (!empty($filter['keywords'])) ? " AND content LIKE '%" . mysql_like_quote($filter['keywords']) . "%' " : '';
 
