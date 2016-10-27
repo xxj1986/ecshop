@@ -177,7 +177,7 @@ class alipay
         $payment  = get_payment($_GET['code']);
         $seller_email = rawurldecode($_GET['seller_email']);
         $order_sn = str_replace($_GET['subject'], '', $_GET['out_trade_no']);
-        $order_sn = trim($order_sn);
+        $order_sn = trim(addslashes($order_sn));
 
         /* 检查数字签名是否正确 */
         ksort($_GET);
