@@ -65,13 +65,13 @@ elseif ($_REQUEST['act'] == 'query')
 */
 elseif ($_REQUEST['act'] == 'del')
 {
-    $oid = (int)$_REQUEST['oid'];
+    $oid = intval($_REQUEST['oid']);
     $stat = $db->getOne("SELECT is_separate FROM " . $GLOBALS['ecs']->table('order_info') . " WHERE order_id = '$oid'");
     if (empty($stat))
     {
         $sql = "UPDATE " . $GLOBALS['ecs']->table('order_info') .
                " SET is_separate = 2" .
-               " WHERE order_id = '$oid'";
+               " WHERE order_id = $oid";
         $db->query($sql);
     }
     $links[] = array('text' => $_LANG['affiliate_ck'], 'href' => 'affiliate_ck.php?act=list');
@@ -82,8 +82,8 @@ elseif ($_REQUEST['act'] == 'del')
 */
 elseif ($_REQUEST['act'] == 'rollback')
 {
-    $logid = (int)$_REQUEST['logid'];
-    $stat = $db->getRow("SELECT * FROM " . $GLOBALS['ecs']->table('affiliate_log') . " WHERE log_id = '$logid'");
+    $logid = intval($_REQUEST['logid']);
+    $stat = $db->getRow("SELECT * FROM " . $GLOBALS['ecs']->table('affiliate_log') . " WHERE log_id = $logid");
     if (!empty($stat))
     {
         if($stat['separate_type'] == 1)
@@ -99,7 +99,7 @@ elseif ($_REQUEST['act'] == 'rollback')
         log_account_change($stat['user_id'], -$stat['money'], 0, -$stat['point'], 0, $_LANG['loginfo']['cancel']);
         $sql = "UPDATE " . $GLOBALS['ecs']->table('affiliate_log') .
                " SET separate_type = '$flag'" .
-               " WHERE log_id = '$logid'";
+               " WHERE log_id = $logid";
         $db->query($sql);
     }
     $links[] = array('text' => $_LANG['affiliate_ck'], 'href' => 'affiliate_ck.php?act=list');
@@ -116,11 +116,11 @@ elseif ($_REQUEST['act'] == 'separate')
 
     $separate_by = $affiliate['config']['separate_by'];
 
-    $oid = (int)$_REQUEST['oid'];
+    $oid = intval($_REQUEST['oid']);
 
     $row = $db->getRow("SELECT o.order_sn, o.is_separate, (o.goods_amount - o.discount) AS goods_amount, o.user_id FROM " . $GLOBALS['ecs']->table('order_info') . " o".
                     " LEFT JOIN " . $GLOBALS['ecs']->table('users') . " u ON o.user_id = u.user_id".
-            " WHERE order_id = '$oid'");
+            " WHERE order_id = $oid");
 
     $order_sn = $row['order_sn'];
 
@@ -180,7 +180,7 @@ elseif ($_REQUEST['act'] == 'separate')
             //推荐订单分成
             $row = $db->getRow("SELECT o.parent_id, u.user_name FROM " . $GLOBALS['ecs']->table('order_info') . " o" .
                     " LEFT JOIN" . $GLOBALS['ecs']->table('users') . " u ON o.parent_id = u.user_id".
-                    " WHERE o.order_id = '$oid'"
+                    " WHERE o.order_id = $oid"
                 );
             $up_uid = $row['parent_id'];
             if(!empty($up_uid) && $up_uid > 0)
@@ -197,7 +197,7 @@ elseif ($_REQUEST['act'] == 'separate')
         }
         $sql = "UPDATE " . $GLOBALS['ecs']->table('order_info') .
                " SET is_separate = 1" .
-               " WHERE order_id = '$oid'";
+               " WHERE order_id = $oid";
         $db->query($sql);
     }
     $links[] = array('text' => $_LANG['affiliate_ck'], 'href' => 'affiliate_ck.php?act=list');

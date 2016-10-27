@@ -105,7 +105,7 @@ if ($_REQUEST['act'] == 'edit')
     admin_priv('shopinfo_manage');
 
     /* 取得文章数据 */
-    $sql = "SELECT article_id, title, content FROM ".$ecs->table('article')."WHERE article_id =".$_REQUEST['id'];
+    $sql = "SELECT article_id, title, content FROM ".$ecs->table('article')."WHERE article_id =".intval($_REQUEST['id']);
     $article = $db->GetRow($sql);
 
     /* 创建 html editor */
@@ -135,7 +135,7 @@ if ($_REQUEST['act'] == 'update')
 
     /* 更新数据 */
     $cur_time = gmtime();
-    if ($exc->edit("title='$_POST[title]', content='$_POST[FCKeditor1]',add_time ='$cur_time'",$_POST['id']))
+    if ($exc->edit("title='$_POST[title]', content='$_POST[FCKeditor1]',add_time ='$cur_time'",intval($_POST['id'])))
     {
         /* 清除缓存 */
         clear_cache_files();
