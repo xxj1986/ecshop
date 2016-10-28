@@ -9,18 +9,16 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 $database = [
     'driver'    => 'mysql',
-    //'host'      => '192.168.2.233',
-    'host'      => '127.0.0.1',
+    'host'      => '192.168.2.233',
     'database'  => 'ecshop',
-    'username'  => 'root',
-    'password'  => 'link@w1nd0ws',
-    //'password' =>'DNY!2#$%^&*9*&^%$#@!DNY',
+    'username'  => 'www',
+    'password'  => 'DNW3$5^7*#4%6&8',
     'charset'   => 'utf8',
     'collation' => 'utf8_unicode_ci',
     'prefix'    => 'ecs_',
 ];
 
-define('REDIS_HOST','127.0.0.1');
+define('REDIS_HOST','192.168.2.233');
 define('REDIS_PORT',6379);
 
 $db = new DB;
