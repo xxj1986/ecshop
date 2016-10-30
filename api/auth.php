@@ -116,6 +116,9 @@ class Auth{
 
         $mobile = $request->input('mobile');
         $password = $request->input('password');
+        $sex = intval($request->input('sex'));
+        $age = intval($request->input('age'));
+        $profession = $request->input('profession'); //职业
         /*
         $captcha = $request->input('captcha');
         //检查验证码
@@ -168,6 +171,9 @@ class Auth{
             'alias' => '', //昵称
             'mobile_phone' => '', //手机号
             'credit_line' => 800000, // 最大消费
+            'sex' => $sex,
+            'age' => $age ? $age : '',
+            'profession' => $profession ? $profession : '', //职业
         ];
         $data['mobile_phone'] = $mobile;
         $data['password'] = md5($password);
