@@ -38,7 +38,7 @@ class Auth{
         $mobile = $request->input('mobile');
         $password = $request->input('password');
         //获取用户信息
-        $user = DB::table('users')->where('mobile_phone',$mobile)->first();
+        $user = DB::table('users')->where('mobile_phone',$user_mobile)->first();
         //var_dump($user);die();
         if( $user && md5($password) == $user->password ){
             $token = str_random(32);
@@ -52,7 +52,7 @@ class Auth{
             //$this->db->table('users')->where('user_id',$user->user_id)->update(['last_login'=>time()]);
             DB::table('users')->where('user_id',$user->user_id)->update(['last_login'=>time()]);
             //返回user_id,token
-            $this->response(['errcode'=>0,'message'=>'登录成功','data'=>['user_id'=>$user->user_id,'token'=>$token] ]);
+            $this->response(['errcode'=>200,'message'=>'登录成功','data'=>['user_id'=>$user->user_id,'token'=>$token] ]);
         }else{
             $this->response(['errcode'=>2002,'message'=>'账号或密码错误！','data'=>[] ]);
         }
@@ -71,7 +71,7 @@ class Auth{
         $this->checkSign($request);
         //删除token
         $this->redis->del('token'.$this->dev);
-        $this->response(['errcode'=>0,'message'=>'退出成功','data'=>[] ]);
+        $this->response(['errcode'=>200,'message'=>'退出成功','data'=>[] ]);
     }
 
     public function checkSign(Request $request){
@@ -144,7 +144,7 @@ class Auth{
         $this->redis->expire('regPass'.$this->dev, 10*60);
 
         //发送短信验证码
-        $this->response(['errcode'=>0,'message'=>'提交信息成功','data'=>[] ]);
+        $this->response(['errcode'=>200,'message'=>'提交信息成功','data'=>[] ]);
         */
 
         $data = [
