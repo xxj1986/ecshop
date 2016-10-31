@@ -35,10 +35,10 @@ class Auth{
      */
     public function login(Request $request){
         //获取用户名和密码
-        $user_mobile = $request->input('mobile_phone');
+        $mobile = $request->input('mobile');
         $password = $request->input('password');
-        //获取
-        $user = DB::table('users')->where('mobile_phone',$user_mobile)->first();
+        //获取用户信息
+        $user = DB::table('users')->where('mobile_phone',$mobile)->first();
         //var_dump($user);die();
         if( $user && md5($password) == $user->password ){
             $token = str_random(32);
@@ -168,7 +168,8 @@ class Auth{
         if(!$res){
             $this->response(['errcode'=>2,'message'=>'注册失败','data'=>[] ]);
         }
-        $this->response(['errcode'=>200,'message'=>'注册成功','data'=>[] ]);
+        //$this->response(['errcode'=>200,'message'=>'注册成功','data'=>[] ]);
+        $this->login($request); //注册后直接登录
     }
 
     /*
