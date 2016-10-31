@@ -131,6 +131,30 @@ class Goods
             if($goods){
                 $res['errcode'] = '200';
                 $res['message'] = '商品信息获取成功';
+                $attrInfo = DB::table('attribute')
+                    ->select('attr_id', 'attr_values')
+                    ->get();
+                //print_r($attrInfo);
+                $attrs = [];
+                foreach($attrInfo as $attr){
+                    $attrs[$attr->attr_id] = $attr->attr_values;
+                }
+                //print_r($attrs);
+                $attrInfo2 = DB::table('goods_attr')
+                    ->where('goods_id',$goods_id)
+                    ->select('attr_id', 'attr_value')
+                    ->get();
+                //print_r($attrInfo2);
+                //$attrs2 = [];
+                $attr2value = [];
+                foreach($attrInfo2 as $attr2){
+                    //$attrs2[$attr2->attr_id] = $attr2->attr_value;
+                    $attr2value[$attrs[$attr2->attr_id]] = $attr2->attr_value;
+                }
+                //print_r($attrs2);
+                //print_r($attr2value);
+
+                $info = $attr2value;
                 $info['goods_thumb'] = (!empty($goods->goods_thumb))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_thumb:'';
                 $info['goods_img'] = (!empty($goods->goods_img))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_img:'';
                 $info['shop_price']  = $goods->shop_price;
