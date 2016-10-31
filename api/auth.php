@@ -10,20 +10,6 @@ use Illuminate\Http\Request;
 //图片验证码
 use Gregwar\Captcha\CaptchaBuilder;
 
-$auth = new Auth();
-
-//参数路由
-$request = Request::capture();
-$act = $request->input('act');
-switch($act){
-    case 'login': $auth->login($request);          break;
-    case 'logout': $auth->logout($request);        break;
-    case 'register': $auth->register($request);    break;
-    case 'createSmsCode': $auth->createSmsCode($request);      break;
-    case 'createCaptcha': $auth->createCaptcha();  break;
-    default: $auth->response();
-}
-
 //定义认证类
 class Auth{
     protected $dev; //设备ID
@@ -271,6 +257,20 @@ class Auth{
         header('Content-type:text/json');
         die(json_encode($data));
     }
+}
+
+$auth = new Auth();
+
+//参数路由
+$request = Request::capture();
+$act = $request->input('act');
+switch($act){
+    case 'login': $auth->login($request);          break;
+    case 'logout': $auth->logout($request);        break;
+    case 'register': $auth->register($request);    break;
+    case 'createSmsCode': $auth->createSmsCode($request);      break;
+    case 'createCaptcha': $auth->createCaptcha();  break;
+    default: $auth->response();
 }
 
 
