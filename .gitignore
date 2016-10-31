@@ -1,6 +1,7 @@
 /data/config.php
 /images
 /temp/compiled
+/api/aip_init.php
 /api/composer.lock
 /api/vendor
 .idea/
