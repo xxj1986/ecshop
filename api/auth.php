@@ -38,7 +38,7 @@ class Auth{
         $mobile = $request->input('mobile');
         $password = $request->input('password');
         //获取用户信息
-        $user = DB::table('users')->where('mobile_phone',$user_mobile)->first();
+        $user = DB::table('users')->where('mobile_phone',$mobile)->first();
         //var_dump($user);die();
         if( $user && md5($password) == $user->password ){
             $token = str_random(32);
