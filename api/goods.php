@@ -73,18 +73,6 @@ class Goods
         $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
         $record_number = $request->input('record_number')?$request->input('record_number'):20;
         $page_number = $request->input('page_number')?$request->input('page_number'):0;
-        /*$users = DB::table('users')
-            ->join('contacts', 'users.id', '=', 'contacts.user_id')
-            ->join('orders', 'users.id', '=', 'orders.user_id')
-            ->select('users.*', 'contacts.phone', 'orders.price')
-            ->orderBy('name', 'desc')
-            ->skip(10)->take(5)  // 要限制查找所返回的结果数量，或略过指定数量的查找结果（偏移），则可使用 skip 和 take 方法：
-            ->get();   //first() 只取一条
-        若你不想取出完整的一行，则可以使用 value 方法来从单条记录中取出单个值。这个方法会直接返回字段的值：
-        $email = DB::table('users')->where('name', 'John')->value('email');
-        $user = DB::table('users')->where('name', 'John')->first();
-        echo $user->name;*/
-
         $res['errcode'] = '200';
         $res['message'] = '商品列表获取成功';
         //banner图数据
