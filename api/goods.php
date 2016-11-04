@@ -46,6 +46,9 @@ class Goods
         //参数路由
         $act = $request->input('act');
         switch ($act) {
+            case 'get_lists':
+                $this->get_lists($request);
+                break;
             case 'get_goods_lists':
                 $this->get_goods_lists($request);
                 break;
@@ -63,6 +66,77 @@ class Goods
         }
     }
 
+    /*
+     * 获取列表页面数据
+     */
+    private function get_lists(Request $request){
+        $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
+        $record_number = $request->input('record_number')?$request->input('record_number'):20;
+        $page_number = $request->input('page_number')?$request->input('page_number'):0;
+        /*$users = DB::table('users')
+            ->join('contacts', 'users.id', '=', 'contacts.user_id')
+            ->join('orders', 'users.id', '=', 'orders.user_id')
+            ->select('users.*', 'contacts.phone', 'orders.price')
+            ->orderBy('name', 'desc')
+            ->skip(10)->take(5)  // 要限制查找所返回的结果数量，或略过指定数量的查找结果（偏移），则可使用 skip 和 take 方法：
+            ->get();   //first() 只取一条
+        若你不想取出完整的一行，则可以使用 value 方法来从单条记录中取出单个值。这个方法会直接返回字段的值：
+        $email = DB::table('users')->where('name', 'John')->value('email');
+        $user = DB::table('users')->where('name', 'John')->first();
+        echo $user->name;*/
+
+        $res['errcode'] = '200';
+        $res['message'] = '商品列表获取成功';
+        //banner图数据
+        $bannerData = DB::table("ad_custom")
+            ->select('content','url')
+            ->orderBy('ad_id','DESC')
+            ->get();
+
+        if($bannerData){
+            $banners = array();
+            foreach ($bannerData as $banner) {
+                $data['url'] = (!empty($banner->url))?$banner->url:'';
+                $data['path'] = (!empty($banner->content))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$banner->content:'';
+                $banners[] = $data;
+            }
+        }
+        $res['data']['banners'] = $banners;
+
+        // 商品数据
+        $goods_list = DB::table('goods')
+            ->where('is_delete',0)
+            ->where('cat_id',$cat_id)
+            ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
+            ->orderBy('goods_id','ASC')
+            ->skip($record_number * $page_number)->take($record_number+1)
+            ->get();
+
+        //print_r($goods_list);
+        if($goods_list){
+            $datas = array();
+            foreach ($goods_list as $goods)
+            {
+                //echo $goods->goods_name;
+                $data['goods_thumb'] = (!empty($goods->goods_thumb))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$goods->goods_thumb:'';
+                $data['goods_img'] = (!empty($goods->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $goods->goods_img:'';
+                $data['shop_price']  = $goods->shop_price;
+                $data['goods_name']  = $goods->goods_name;
+                $data['cat_id']  = $goods->cat_id;
+                $data['goods_number']  = $goods->goods_number;
+                $datas[] = $data;
+            }
+            //print_r($datas);
+            $res['data']['lists'] = $datas;
+        }
+
+        if(!$goods_list && !$bannerData){ //如果banner和商品列表数据都为空
+            $res['errcode'] = '1001';
+            $res['message'] = '数据获取失败！';
+            $res['data'] = [];
+        }
+        $this->response($res);
+    }
 
     /*
      * 获取产品列表信息
