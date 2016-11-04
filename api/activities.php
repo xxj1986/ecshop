@@ -89,7 +89,7 @@ class Activities extends Sign{
     public function cancel(Request $request){
         $active_id = intval($request->input('active_id'));
         $user_id = intval($request->input('user_id'));
-        $res = DB::table('activity_users')->where(['active_id'=>$active_id,'user_id'=>$active_id])->delete();
+        $res = DB::table('activity_users')->where(['active_id'=>$active_id,'user_id'=>$user_id])->delete();
         if($res){
             $data = ['errcode' => 200, 'message' => '取消报名成功', 'data'=>[] ];
         }else{
@@ -109,5 +109,6 @@ switch($act){
     case 'listLive': $activities->listLive($request);        break;
     case 'details': $activities->details($request);          break;
     case 'join': $activities->join($request);                break;
+    case 'cancel': $activities->cancel($request);            break;
     default: $activities->response();
 }
