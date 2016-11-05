@@ -54,7 +54,7 @@ class Order
 
 
     /*
-     * 获取产品列表信息
+     * 添加购物车信息
      */
     private function set_cart(Request $request)
     {
@@ -103,7 +103,7 @@ class Order
     }
 
     /**
-     * 获取商品信息
+     * 获取购物车信息
      */
     private function get_cart_infos(Request $request)
     {
@@ -142,7 +142,7 @@ class Order
     }
 
     /**
-     * 获取商品对应的属性信息
+     * 更新购物车信息
      */
     private function update_cart(Request $request)
     {
@@ -171,38 +171,23 @@ class Order
     }
 
     /**
-     * 获取商品对应的属性信息
+     * 删除对应购物车信息
      */
     private function delete_cart(Request $request)
     {
-        $goods_name = $request->input('name') ? $request->input('name') : '红酒';
+        $cart_id = $request->input('cid') ? $request->input('cid') :0;
 
-        $attrs = DB::table('goods')
-            ->where('goods_name', 'like', '%' . $goods_name . '%')//where('name', 'like', 'T%')
-            ->select('goods_id', 'cat_id', 'goods_name', 'goods_number', 'shop_price', 'keywords', 'goods_thumb', 'goods_img', 'last_update')
-            ->orderBy('goods_id', 'ASC')
-            ->take(30)
-            ->get();
-        //print_r($attrs);
-        if ($attrs) {
-            $datas = [];
-            foreach ($attrs as $attr) {
-                $res['errcode'] = '0';
-                $res['message'] = '获取商品属性信息成功！';
-                $data['goods_thumb'] = (!empty($attr->goods_thumb)) ? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $attr->goods_thumb : '';
-                $data['goods_img'] = (!empty($attr->goods_img)) ? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $attr->goods_img : '';
-                $data['shop_price'] = $attr->shop_price;
-                $data['goods_name'] = $attr->goods_name;
-                $data['cat_id'] = $attr->cat_id;
-                $data['goods_number'] = $attr->goods_number;
-                $datas[] = $data;
-            }
-            $res['data'] = $datas;
+        $state = DB::table('cart')
+            ->where('rec_id',$cart_id)
+            ->delete();
+        if ($state) {
+            $res['errcode'] = '200';
+            $res['message'] = '删除记录成功！';
         } else {
-            $res['errcode'] = '1001';
-            $res['message'] = '获取商品属性信息失败！';
-            $res['data'] = [];
+            $res['errcode'] = '2001';
+            $res['message'] = '删除购物车记录失败！';
         }
+        $res['data'] = [];
         $this->response($res);
     }
 

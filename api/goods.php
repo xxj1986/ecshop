@@ -131,8 +131,8 @@ class Goods
      */
     private function get_goods_lists(Request $request){
         $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
-        $record_number = $request->input('record_number')?$request->input('record_number'):20;
-        $page_number = $request->input('page_number')?$request->input('page_number'):0;
+        $record = $request->input('record')?$request->input('record'):20;
+        $page = $request->input('page')?$request->input('page'):1;
         /*$users = DB::table('users')
             ->join('contacts', 'users.id', '=', 'contacts.user_id')
             ->join('orders', 'users.id', '=', 'orders.user_id')
@@ -149,7 +149,7 @@ class Goods
             ->where('cat_id',$cat_id)
             ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
             ->orderBy('goods_id','ASC')
-            ->skip($record_number * $page_number)->take($record_number+1)
+            ->skip($record * ($page-1))->take($record)
             ->get();
 
         //print_r($goods_list);
@@ -183,6 +183,7 @@ class Goods
      */
     private function get_goods_info(Request $request){
         $goods_id = $request->input('id')?$request->input('id'):0;
+
         if($goods_id>0){
             $goods = DB::table('goods')
                 ->where('is_delete',0)
@@ -194,26 +195,18 @@ class Goods
                 $res['errcode'] = '200';
                 $res['message'] = '商品信息获取成功';
                 $attrInfo = DB::table('attribute')
-                    ->select('attr_id', 'attr_values')
-                    ->get();
+                    ->pluck('attr_values','attr_id');
                 //print_r($attrInfo);
-                $attrs = [];
-                foreach($attrInfo as $attr){
-                    $attrs[$attr->attr_id] = $attr->attr_values;
-                }
-                //print_r($attrs);
+
                 $attrInfo2 = DB::table('goods_attr')
                     ->where('goods_id',$goods_id)
-                    ->select('attr_id', 'attr_value')
-                    ->get();
+                    ->pluck( 'attr_value','attr_id');
                 //print_r($attrInfo2);
-                //$attrs2 = [];
+
                 $attr2value = [];
-                foreach($attrInfo2 as $attr2){
-                    //$attrs2[$attr2->attr_id] = $attr2->attr_value;
-                    $attr2value[$attrs[$attr2->attr_id]] = $attr2->attr_value;
+                foreach($attrInfo as $attrid => $attrval){
+                    $attr2value[$attrval] = isset($attrInfo2[$attrid])?$attrInfo2[$attrid]:'';
                 }
-                //print_r($attrs2);
                 //print_r($attr2value);
 
                 $info = $attr2value;
@@ -274,7 +267,7 @@ class Goods
             ->where('goods_name','like','%'.$goods_name.'%')  //where('name', 'like', 'T%')
             ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
             ->orderBy('goods_id','ASC')
-            ->take(30)
+            ->take(10)
             ->get();
         //print_r($attrs);
         if($attrs){
