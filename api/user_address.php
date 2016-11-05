@@ -95,11 +95,15 @@ class UserAddress extends Sign{
     public function editAddress(Request $request){
         //验证输入信息
         $data = $this->checkInput($request);
-        $res = DB::table('user_address')->update($data);
+        $address_id = intval($request->input('address_id'));
+        if(!$address_id){
+            $this->response(['errcode'=>1001,'message'=>'参数错误','data'=>[] ]);
+        }
+        $res = DB::table('user_address')->where('address_id',$address_id)->update($data);
         if($res){
             $data = ['errcode' => 200, 'message' => '修改收货人信息成功', 'data'=>[] ];
         }else{
-            $data = ['errcode' => 500, 'message' => '修改收货人信息失败', 'data'=>[] ];
+            $data = ['errcode' => 500, 'message' => '收货人信息无修改', 'data'=>[] ];
         }
         $this->response($data);
     }
