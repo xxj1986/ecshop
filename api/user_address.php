@@ -24,6 +24,22 @@ class UserAddress extends Sign{
         $this->response($data);
     }
 
+    /*
+     * 获取默认收货人信息
+     */
+    public function getDefault(Request $request){
+        $user_id = intval($request->input('user_id'));
+        $defInfo = DB::table('user_address')->where('user_id',$user_id)->where('is_default','y')->first();
+        if($defInfo){
+            $message = '获取默认收货人信息成功';
+            $data = ['errcode' => 200, 'message' => $message, 'data'=>$defInfo];
+        }else{
+            $message = '您还没有设置默认收货人';
+            $data = ['errcode' => 404, 'message' => $message, 'data'=>[]];
+        }
+        $this->response($data);
+    }
+
 
     /*
      * 设置默认地址
