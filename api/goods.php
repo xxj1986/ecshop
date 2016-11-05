@@ -71,9 +71,6 @@ class Goods
      */
     private function get_lists(Request $request){
         $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
-
-        $res['errcode'] = '200';
-        $res['message'] = '商品列表获取成功';
         //banner图数据
         $bannerData = DB::table("ad_custom")
             ->select('content','url')
@@ -113,7 +110,15 @@ class Goods
                 $datas[] = $data;
             }
             //print_r($datas);
-            $res['data']['lists'] = $datas;
+            if(count($datas)>0){
+                $res['errcode'] = '200';
+                $res['message'] = '商品获取成功！';
+                $res['data'] = $datas;
+            }else{
+                $res['errcode'] = '2001';
+                $res['message'] = '商品数据为空！';
+                $res['data'] = $datas;
+            }
         }
 
         if(!$goods_list && !$bannerData){ //如果banner和商品列表数据都为空
@@ -142,8 +147,6 @@ class Goods
 
         //print_r($goods_list);
         if($goods_list){
-            $res['errcode'] = '200';
-            $res['message'] = '商品列表获取成功';
             $datas = array();
             foreach ($goods_list as $goods)
             {
@@ -155,8 +158,15 @@ class Goods
                 $data['keywords']  = $goods->keywords;
                 $datas[] = $data;
             }
-            //print_r($datas);
-            $res['data'] = $datas;
+            if(count($datas)>0){
+                $res['errcode'] = '200';
+                $res['message'] = '商品列表获取成功';
+                $res['data'] = $datas;
+            }else{
+                $res['errcode'] = '2001';
+                $res['message'] = '商品数据为空！';
+                $res['data'] = $datas;
+            }
         }else{
             $res['errcode'] = '1001';
             $res['message'] = '商品列表获取失败！';
