@@ -76,6 +76,7 @@ class UserAddress extends Sign{
         $data['is_default'] = 'n';
         $data['user_id'] = $user_id;
         if($setDef == 'y'){
+            DB::table('user_address')->where('user_id',$user_id)->update(['is_default'=>'n']);
             $data['is_default'] = 'y';
         }
         //保存地址
