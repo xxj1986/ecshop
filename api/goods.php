@@ -67,12 +67,11 @@ class Goods
     }
 
     /*
-     * 获取列表页面数据
+     * 获取首页数据
      */
     private function get_lists(Request $request){
         $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
-        $record_number = $request->input('record_number')?$request->input('record_number'):20;
-        $page_number = $request->input('page_number')?$request->input('page_number'):0;
+
         $res['errcode'] = '200';
         $res['message'] = '商品列表获取成功';
         //banner图数据
@@ -95,9 +94,9 @@ class Goods
         $goods_list = DB::table('goods')
             ->where('is_delete',0)
             ->where('cat_id',$cat_id)
-            ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
+            ->select('goods_id','goods_name','shop_price','keywords','goods_img')
             ->orderBy('goods_id','ASC')
-            ->skip($record_number * $page_number)->take($record_number+1)
+            ->take(10)
             ->get();
 
         //print_r($goods_list);
@@ -106,12 +105,11 @@ class Goods
             foreach ($goods_list as $goods)
             {
                 //echo $goods->goods_name;
-                $data['goods_thumb'] = (!empty($goods->goods_thumb))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$goods->goods_thumb:'';
+                $data['goods_id']  = $goods->goods_id;
                 $data['goods_img'] = (!empty($goods->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $goods->goods_img:'';
                 $data['shop_price']  = $goods->shop_price;
                 $data['goods_name']  = $goods->goods_name;
-                $data['cat_id']  = $goods->cat_id;
-                $data['goods_number']  = $goods->goods_number;
+                $data['keywords']  = $goods->keywords;
                 $datas[] = $data;
             }
             //print_r($datas);
@@ -131,23 +129,13 @@ class Goods
      */
     private function get_goods_lists(Request $request){
         $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
-        $record = $request->input('record')?$request->input('record'):20;
+        $record = $request->input('record')?$request->input('record'):10;
         $page = $request->input('page')?$request->input('page'):1;
-        /*$users = DB::table('users')
-            ->join('contacts', 'users.id', '=', 'contacts.user_id')
-            ->join('orders', 'users.id', '=', 'orders.user_id')
-            ->select('users.*', 'contacts.phone', 'orders.price')
-            ->orderBy('name', 'desc')
-            ->skip(10)->take(5)  // 要限制查找所返回的结果数量，或略过指定数量的查找结果（偏移），则可使用 skip 和 take 方法：
-            ->get();   //first() 只取一条
-        若你不想取出完整的一行，则可以使用 value 方法来从单条记录中取出单个值。这个方法会直接返回字段的值：
-        $email = DB::table('users')->where('name', 'John')->value('email');
-        $user = DB::table('users')->where('name', 'John')->first();
-        echo $user->name;*/
+
         $goods_list = DB::table('goods')
             ->where('is_delete',0)
             ->where('cat_id',$cat_id)
-            ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
+            ->select('goods_id','goods_name','shop_price','keywords','goods_img')
             ->orderBy('goods_id','ASC')
             ->skip($record * ($page-1))->take($record)
             ->get();
@@ -160,12 +148,11 @@ class Goods
             foreach ($goods_list as $goods)
             {
                 //echo $goods->goods_name;
-                $data['goods_thumb'] = (!empty($goods->goods_thumb))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$goods->goods_thumb:'';
+                $data['goods_id']  = $goods->goods_id;
                 $data['goods_img'] = (!empty($goods->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $goods->goods_img:'';
                 $data['shop_price']  = $goods->shop_price;
                 $data['goods_name']  = $goods->goods_name;
-                $data['cat_id']  = $goods->cat_id;
-                $data['goods_number']  = $goods->goods_number;
+                $data['keywords']  = $goods->keywords;
                 $datas[] = $data;
             }
             //print_r($datas);
@@ -179,44 +166,41 @@ class Goods
     }
 
     /**
-     * 获取商品信息
+     * 获取商品信息 包括熟悉，相册和基本信息
      */
     private function get_goods_info(Request $request){
         $goods_id = $request->input('id')?$request->input('id'):0;
-
         if($goods_id>0){
             $goods = DB::table('goods')
                 ->where('is_delete',0)
                 ->where('goods_id',$goods_id)
-                ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
+                ->select('goods_id','goods_name','goods_number','market_price','shop_price','keywords','goods_thumb','goods_img','goods_desc')
                 ->first();
             //print_r($goods);
             if($goods){
                 $res['errcode'] = '200';
-                $res['message'] = '商品信息获取成功';
-                $attrInfo = DB::table('attribute')
-                    ->pluck('attr_values','attr_id');
-                //print_r($attrInfo);
+                $res['message'] = '商品信息获取成功！';
 
-                $attrInfo2 = DB::table('goods_attr')
-                    ->where('goods_id',$goods_id)
-                    ->pluck( 'attr_value','attr_id');
-                //print_r($attrInfo2);
-
-                $attr2value = [];
-                foreach($attrInfo as $attrid => $attrval){
-                    $attr2value[$attrval] = isset($attrInfo2[$attrid])?$attrInfo2[$attrid]:'';
-                }
+                $imgs = $this->get_goods_gallery($goods_id);
+                //print_r($imgs);
+                $attr2value = $this->get_goods_attribute($goods_id);
                 //print_r($attr2value);
+                $commetns = $this->get_goods_comment($goods_id);
+                //print_r($commetns);
 
                 $info = $attr2value;
-                $info['goods_thumb'] = (!empty($goods->goods_thumb))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_thumb:'';
+                //$info['goods_thumb'] = (!empty($goods->goods_thumb))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_thumb:'';
                 $info['goods_img'] = (!empty($goods->goods_img))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_img:'';
+                $info['market_price']  = $goods->market_price;
                 $info['shop_price']  = $goods->shop_price;
                 $info['goods_name']  = $goods->goods_name;
-                $info['cat_id']  = $goods->cat_id;
+                $info['keywords']  = $goods->keywords;
+                $info['goods_desc']  = $goods->goods_desc;
                 $info['goods_number']  = $goods->goods_number;
-                $res['data'] = $info;
+
+                $res['data']['imgs'] = $imgs;
+                $res['data']['attrs'] = $info;
+                $res['data']['commetns'] = $commetns;
             }else{
                 $res['errcode'] = '1001';
                 $res['message'] = '获取商品信息失败！';
@@ -233,65 +217,106 @@ class Goods
     /**
      * 获取商品对应的属性信息
      */
-    private function get_goods_attribute(Request $request){
-        $goods_id = $request->input('id')?$request->input('id'):0;
+    private function get_goods_attribute($goods_id){
         if ($goods_id>0) {
-            $attrs = DB::table('goods_attr')
+            $res['errcode'] = '200';
+            $res['message'] = '商品信息获取成功';
+            $attrInfo = DB::table('attribute')
+                ->pluck('attr_values','attr_id');
+            //print_r($attrInfo);
+
+            $attrInfo2 = DB::table('goods_attr')
                 ->where('goods_id',$goods_id)
-                ->select('goods_id','attr_id','attr_value','attr_price')
-                ->get();
-            //print_r($goods);
-            if($attrs){
-                $res['errcode'] = '200';
-                $res['message'] = '获取商品属性信息成功！';
-                $res['data'] = $attrs;
-            }else{
-                $res['errcode'] = '1001';
-                $res['message'] = '获取商品属性信息失败！';
-                $res['data'] = [];
+                ->pluck( 'attr_value','attr_id');
+            //print_r($attrInfo2);
+
+            $attr2value = [];
+            foreach($attrInfo as $attrid => $attrval){
+                $attr2value[$attrval] = isset($attrInfo2[$attrid])?$attrInfo2[$attrid]:'';
             }
-        } else {
-            $res['errcode'] = '1002';
-            $res['message'] = '商品信息有误！';
-            $res['data'] = [];
+        }else{
+            $attr2value = [];
         }
-        $this->response($res);
+        return $attr2value;
+    }
+
+    /**
+     * 获取商品对应相册数据
+     */
+    private function get_goods_gallery($goods_id){
+        $imgs = [];
+        if ($goods_id>0) {
+            $gallery = DB::table('goods_gallery')
+                ->where('goods_id', $goods_id)
+                ->select('img_url')
+                ->get();
+            //print_r($gallery);
+
+            if($gallery){
+                foreach($gallery as $img){
+                    $imgs[] = $img->img_url;
+                }
+            }
+        }
+        return $imgs;
+    }
+
+    /**
+     * 获取商品对应相册数据
+     */
+    private function get_goods_comment($goods_id){
+        $comments = [];
+        if ($goods_id>0) {
+            $contents = DB::table('comment')
+                ->where('id_value', $goods_id)
+                ->select('content','user_name','comment_id')
+                ->get();
+            //print_r($contents);
+
+            if($contents){
+                foreach ($contents as $content) {
+                    $data['comment_id'] = $content->comment_id;
+                    $data['user_name'] = $content->user_name;
+                    $data['content'] = $content->content;
+                    $comments[] = $data;
+                }
+            }
+        }
+        return $comments;
     }
 
     /**
      * 获取商品对应的属性信息
      */
     private function get_search(Request $request){
-        $goods_name = $request->input('name')?$request->input('name'):'红酒';
-        $attrs = DB::table('goods')
+        $goods_name = $request->input('word')?$request->input('word'):'红酒';
+        $goods = DB::table('goods')
             ->where('goods_name','like','%'.$goods_name.'%')  //where('name', 'like', 'T%')
-            ->select('goods_id','cat_id','goods_name','goods_number','shop_price','keywords','goods_thumb','goods_img','last_update')
+            ->select('goods_id','goods_name','shop_price','keywords','goods_img')
             ->orderBy('goods_id','ASC')
             ->take(10)
             ->get();
         //print_r($attrs);
-        if($attrs){
+        if($goods){
             $datas = [];
-            foreach($attrs as $attr){
+            foreach($goods as $good){
                 $res['errcode'] = '200';
-                $res['message'] = '获取商品属性信息成功！';
-                $data['goods_thumb'] = (!empty($attr->goods_thumb))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$attr->goods_thumb:'';
-                $data['goods_img'] = (!empty($attr->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $attr->goods_img:'';
-                $data['shop_price']  = $attr->shop_price;
-                $data['goods_name']  = $attr->goods_name;
-                $data['cat_id']  = $attr->cat_id;
-                $data['goods_number']  = $attr->goods_number;
-                $datas[] = $data;
+                $res['message'] = '搜索商品成功！';
+
+                $data['goods_id']  = $good->goods_id;
+                $data['goods_img'] = (!empty($good->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $good->goods_img:'';
+                $data['shop_price']  = $good->shop_price;
+                $data['goods_name']  = $good->goods_name;
+                $data['keywords']  = $good->keywords;
             }
             $res['data'] = $datas;
         }else{
             $res['errcode'] = '1001';
-            $res['message'] = '获取商品属性信息失败！';
+            $res['message'] = '搜索商品失败！';
             $res['data'] = [];
         }
         $this->response($res);
     }
-
 
     /*
      * 输出函数
@@ -299,65 +324,6 @@ class Goods
     public function response($res=['errcode'=>2001,'message'=>'action not found','data'=>[]]){
         header('Content-type:text/json');
         die(json_encode($res));
-    }
-
-    /**
-     * 解密函数
-     *
-     * @param string $txt
-     * @param string $key
-     * @return string
-     */
-    public function passport_decrypt($txt, $key)
-    {
-        $txt = passport_key(base64_decode($txt), $key);
-        $tmp = '';
-        for ($i = 0;$i < strlen($txt); $i++) {
-            $md5 = $txt[$i];
-            $tmp .= $txt[++$i] ^ $md5;
-        }
-        return $tmp;
-    }
-
-    /**
-     * 加密函数
-     *
-     * @param string $txt
-     * @param string $key
-     * @return string
-     */
-    public function passport_encrypt($txt, $key)
-    {
-        srand((double)microtime() * 1000000);
-        $encrypt_key = md5(rand(0, 32000));
-        $ctr = 0;
-        $tmp = '';
-        for($i = 0; $i < strlen($txt); $i++ )
-        {
-            $ctr = $ctr == strlen($encrypt_key) ? 0 : $ctr;
-            $tmp .= $encrypt_key[$ctr].($txt[$i] ^ $encrypt_key[$ctr++]);
-        }
-        return base64_encode(passport_key($tmp, $key));
-    }
-
-    /**
-     * 编码函数
-     *
-     * @param string $txt
-     * @param string $encrypt_key
-     * @return string
-     */
-    public function passport_key($txt, $encrypt_key)
-    {
-        $encrypt_key = md5($encrypt_key);
-        $ctr = 0;
-        $tmp = '';
-        for($i = 0; $i < strlen($txt); $i++)
-        {
-            $ctr = $ctr == strlen($encrypt_key) ? 0 : $ctr;
-            $tmp .= $txt[$i] ^ $encrypt_key[$ctr++];
-        }
-        return $tmp;
     }
 }
 
