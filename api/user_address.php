@@ -153,6 +153,7 @@ $act = $request->input('act');
 switch($act){
     case 'listAll': $activities->listAll($request);          break;
     case 'setDefault': $activities->setDefault($request);        break;
+    case 'getDefault': $activities->getDefault($request);        break;
     case 'addAddress': $activities->addAddress($request);          break;
     case 'editAddress': $activities->editAddress($request);        break;
     case 'delAddress': $activities->delAddress($request);            break;
