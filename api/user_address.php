@@ -74,6 +74,7 @@ class UserAddress extends Sign{
         $data = $this->checkInput($request);
         //组合数据
         $data['is_default'] = 'n';
+        $data['user_id'] = $user_id;
         if($setDef == 'y'){
             $data['is_default'] = 'y';
         }
