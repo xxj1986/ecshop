@@ -73,7 +73,6 @@ class UserAddress extends Sign{
         //验证输入信息
         $data = $this->checkInput($request);
         //组合数据
-        $data['contry'] = '中国';
         $data['is_default'] = 'n';
         if($setDef == 'y'){
             $data['is_default'] = 'y';
