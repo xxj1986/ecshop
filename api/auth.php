@@ -359,6 +359,7 @@ switch($act){
     case 'logout': $auth->logout($request);        break;
     case 'register': $auth->register($request);    break;
     case 'createSmsCode': $auth->createSmsCode($request);      break;
+    case 'resetPassword': $auth->resetPassword($request);      break;
     case 'createCaptcha': $auth->createCaptcha();  break;
     default: $auth->response();
 }
