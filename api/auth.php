@@ -120,6 +120,10 @@ class Auth{
         if(!$code){
             $this->response(['errcode'=>2008,'message'=>'请输入验证码','data'=>[] ]);
         }
+        $regCode = $this->redis->get('regCode'.$mobile);
+        if($code != $regCode){
+            //$this->response(['errcode'=>302,'message'=>'验证码不正确','data'=>[] ]);
+        }
         //检查手机号
         if(!$mobile){
             $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>[] ]);
@@ -227,8 +231,47 @@ class Auth{
      * 创建短信验证码
      */
     public function createSmsCode(Request $request){
-        $mobile = $request->input('mobile');
-        $this->response(['errcode'=>200,'message'=>'该功能暂时没有实现，请随意填写个手机验证码','data'=>[] ]);
+        $mobile = trim($request->input('mobile'));
+        $type = trim($request->input('type'));
+        //检查手机号
+        if(!$mobile){
+            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>[] ]);
+        }
+        $match = "/1[3458]{1}\d{9}$/";
+        if(!preg_match($match, $mobile)){
+            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>[] ]);
+        }
+        $timer = $this->redis->get('codeTimer'.$mobile);
+        if($timer){
+            $sec = time() - $timer + 1;
+            $this->response(['errcode'=>300,'message'=>'发送频率过快，请于'.$sec.'后再试','data'=>[] ]);
+        }
+        $code = rand(100000,999999);
+        switch($type){
+            case 'register' :
+                $message = "您的注册验证码是$code,10分钟内输入有效";
+                $this->redis->set('regCode'.$mobile,$code);
+                $this->redis->expire('regCode'.$mobile, 10*60);
+                break;
+            case 'reset' :
+                $message = "您重置密码的证码是$code,10分钟内输入有效";
+                $this->redis->set('rstCode'.$mobile,$code);
+                $this->redis->expire('rstCode'.$mobile, 10*60);
+                break;
+            default:
+                $message = "您的证码是$code,10分钟内输入有效";
+                $this->redis->set('defCode'.$mobile,$code);
+                $this->redis->expire('defCode'.$mobile, 10*60);
+        }
+        //发送短信验证码
+        $res = true;
+        if($res){
+            //设置计数器
+            $this->redis->set('codeTimer'.$mobile,time());
+            $this->redis->expire('codeTimer'.$mobile, 60); //限制每个手机号发送频率为60秒一次
+            $this->response(['errcode'=>200,'message'=>'该功能暂时没有实现，请随意填写个手机验证码','data'=>[] ]);
+        }
+        else $this->response(['errcode'=>500,'message'=>'发送短信验证码失败','data'=>[] ]);
     }
 
     /*
@@ -248,7 +291,53 @@ class Auth{
         if($userInfo){
             $this->response(['errcode'=>2006,'message'=>'该手机号已注册','data'=>[] ]);
         }
-        $this->response(['errcode'=>200,'message'=>'该手机号可以注册','data'=>[] ]);
+        $this->response(['errcode'=>200,'message'=>'该手机号未注册','data'=>[] ]);
+    }
+
+    /*
+     * 重置密码
+     */
+    public function resetPassword(Request $request){
+        $mobile = trim($request->input('mobile'));
+        $code = trim($request->input('code'));
+        $password = trim(strval($request->input('password')));
+
+        //检查手机号
+        if(!$mobile){
+            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>[] ]);
+        }
+        $match = "/1[3458]{1}\d{9}$/";
+        if(!preg_match($match, $mobile)){
+            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>[] ]);
+        }
+        if(!$password){
+            $this->response(['errcode'=>302,'message'=>'请输入密码','data'=>[] ]);
+        }
+        if(strlen($password) < 6){
+            $this->response(['errcode'=>302,'message'=>'密码长度至少为6位','data'=>[] ]);
+        }
+        //检查验证码
+        if(!$code){
+            $this->response(['errcode'=>2008,'message'=>'请输入验证码','data'=>[] ]);
+        }
+        $regCode = $this->redis->get('rstCode'.$mobile); //获取重置验证码
+        if($code != $regCode){
+            //$this->response(['errcode'=>302,'message'=>'验证码不正确','data'=>[] ]);
+        }
+        $userInfo = DB::table('users')->where('mobile_phone',$mobile)->first();
+        if(!$userInfo){
+            $this->response(['errcode'=>300,'message'=>'该手机号未注册','data'=>[] ]);
+        }
+        $newPwd = md5($password);
+        if($newPwd == $userInfo->password){
+            $this->response(['errcode'=>200,'message'=>'修改密码成功','data'=>[] ]);
+        }
+        $res = DB::table('users')->where('mobile_phone',$mobile)->update(['password'=>$newPwd]);
+        if($res){
+            $this->redis->del('rstCode'.$mobile);
+            $this->response(['errcode'=>200,'message'=>'修改密码成功','data'=>[] ]);
+        }
+        $this->response(['errcode'=>300,'message'=>'修改密码失败','data'=>[] ]);
     }
 
     /*
