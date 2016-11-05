@@ -113,11 +113,11 @@ class Goods
             if(count($datas)>0){
                 $res['errcode'] = '200';
                 $res['message'] = '商品获取成功！';
-                $res['data'] = $datas;
+                $res['data']['lists'] = $datas;
             }else{
                 $res['errcode'] = '2001';
                 $res['message'] = '商品数据为空！';
-                $res['data'] = $datas;
+                $res['data']['lists'] = $datas;
             }
         }
 
