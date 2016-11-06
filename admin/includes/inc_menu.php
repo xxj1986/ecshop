@@ -20,24 +20,24 @@ if (!defined('IN_ECS'))
 
 $modules['02_cat_and_goods']['01_goods_list']       = 'goods.php?act=list';         // 商品列表
 $modules['02_cat_and_goods']['02_goods_add']        = 'goods.php?act=add';          // 添加商品
-$modules['02_cat_and_goods']['03_category_list']    = 'category.php?act=list';
-$modules['02_cat_and_goods']['05_comment_manage']   = 'comment_manage.php?act=list';
-$modules['02_cat_and_goods']['06_goods_brand_list'] = 'brand.php?act=list';
-$modules['02_cat_and_goods']['08_goods_type']       = 'goods_type.php?act=manage';
-$modules['02_cat_and_goods']['11_goods_trash']      = 'goods.php?act=trash';        // 商品回收站
-$modules['02_cat_and_goods']['12_batch_pic']        = 'picture_batch.php';
-$modules['02_cat_and_goods']['13_batch_add']        = 'goods_batch.php?act=add';    // 商品批量上传
-$modules['02_cat_and_goods']['14_goods_export']     = 'goods_export.php?act=goods_export';
-$modules['02_cat_and_goods']['15_batch_edit']       = 'goods_batch.php?act=select'; // 商品批量修改
-$modules['02_cat_and_goods']['16_goods_script']     = 'gen_goods_script.php?act=setup';
-$modules['02_cat_and_goods']['17_tag_manage']       = 'tag_manage.php?act=list';
-$modules['02_cat_and_goods']['50_virtual_card_list']   = 'goods.php?act=list&extension_code=virtual_card';
-$modules['02_cat_and_goods']['51_virtual_card_add']    = 'goods.php?act=add&extension_code=virtual_card';
-$modules['02_cat_and_goods']['52_virtual_card_change'] = 'virtual_card.php?act=change';
-$modules['02_cat_and_goods']['goods_auto']             = 'goods_auto.php?act=list';
+$modules['02_cat_and_goods']['03_category_list']    = 'category.php?act=list';      // 商品分类
+$modules['02_cat_and_goods']['05_comment_manage']   = 'comment_manage.php?act=list';// 用户评价
+//$modules['02_cat_and_goods']['06_goods_brand_list'] = 'brand.php?act=list';
+$modules['02_cat_and_goods']['08_goods_type']       = 'goods_type.php?act=manage';  //商品类型
+//$modules['02_cat_and_goods']['11_goods_trash']      = 'goods.php?act=trash';        // 商品回收站
+//$modules['02_cat_and_goods']['12_batch_pic']        = 'picture_batch.php';
+//$modules['02_cat_and_goods']['13_batch_add']        = 'goods_batch.php?act=add';    // 商品批量上传
+//$modules['02_cat_and_goods']['14_goods_export']     = 'goods_export.php?act=goods_export';
+//$modules['02_cat_and_goods']['15_batch_edit']       = 'goods_batch.php?act=select'; // 商品批量修改
+//$modules['02_cat_and_goods']['16_goods_script']     = 'gen_goods_script.php?act=setup';
+//$modules['02_cat_and_goods']['17_tag_manage']       = 'tag_manage.php?act=list';
+//$modules['02_cat_and_goods']['50_virtual_card_list']   = 'goods.php?act=list&extension_code=virtual_card';
+//$modules['02_cat_and_goods']['51_virtual_card_add']    = 'goods.php?act=add&extension_code=virtual_card';
+//$modules['02_cat_and_goods']['52_virtual_card_change'] = 'virtual_card.php?act=change';
+//$modules['02_cat_and_goods']['goods_auto']             = 'goods_auto.php?act=list';
 
 
-$modules['03_promotion']['02_snatch_list']          = 'snatch.php?act=list';
+/*$modules['03_promotion']['02_snatch_list']          = 'snatch.php?act=list';
 $modules['03_promotion']['04_bonustype_list']       = 'bonus.php?act=list';
 $modules['03_promotion']['06_pack_list']            = 'pack.php?act=list';
 $modules['03_promotion']['07_card_list']            = 'card.php?act=list';
@@ -49,36 +49,37 @@ $modules['03_promotion']['13_wholesale']            = 'wholesale.php?act=list';
 $modules['03_promotion']['14_package_list']         = 'package.php?act=list';
 //$modules['03_promotion']['ebao_commend']            = 'ebao_commend.php?act=list';
 $modules['03_promotion']['15_exchange_goods']       = 'exchange_goods.php?act=list';
+*/
 
-
-$modules['04_order']['02_order_list']               = 'order.php?act=list';
-$modules['04_order']['03_order_query']              = 'order.php?act=order_query';
-$modules['04_order']['04_merge_order']              = 'order.php?act=merge';
-$modules['04_order']['05_edit_order_print']         = 'order.php?act=templates';
-$modules['04_order']['06_undispose_booking']        = 'goods_booking.php?act=list_all';
+$modules['04_order']['02_order_list']               = 'order.php?act=list';  //订单列表
+$modules['04_order']['03_order_query']              = 'order.php?act=order_query'; //订单查询
+//$modules['04_order']['04_merge_order']              = 'order.php?act=merge';
+//$modules['04_order']['05_edit_order_print']         = 'order.php?act=templates';
+//$modules['04_order']['06_undispose_booking']        = 'goods_booking.php?act=list_all';
 //$modules['04_order']['07_repay_application']        = 'repay.php?act=list_all';
-$modules['04_order']['08_add_order']                = 'order.php?act=add';
-$modules['04_order']['09_delivery_order']           = 'order.php?act=delivery_list';
-$modules['04_order']['10_back_order']               = 'order.php?act=back_list';
+$modules['04_order']['08_add_order']                = 'order.php?act=add'; //添加订单
+$modules['04_order']['09_delivery_order']           = 'order.php?act=delivery_list'; //发货单列表
+$modules['04_order']['10_back_order']               = 'order.php?act=back_list'; //退货单列表
 
-$modules['05_banner']['ad_position']                = 'ad_position.php?act=list';
+/*$modules['05_banner']['ad_position']                = 'ad_position.php?act=list'; //广告列表
 $modules['05_banner']['ad_list']                    = 'ads.php?act=list';
+*/
 
-$modules['06_stats']['flow_stats']                  = 'flow_stats.php?act=view';
-$modules['06_stats']['searchengine_stats']          = 'searchengine_stats.php?act=view';
-$modules['06_stats']['z_clicks_stats']              = 'adsense.php?act=list';
-$modules['06_stats']['report_guest']                = 'guest_stats.php?act=list';
-$modules['06_stats']['report_order']                = 'order_stats.php?act=list';
-$modules['06_stats']['report_sell']                 = 'sale_general.php?act=list';
-$modules['06_stats']['sale_list']                   = 'sale_list.php?act=list';
-$modules['06_stats']['sell_stats']                  = 'sale_order.php?act=goods_num';
-$modules['06_stats']['report_users']                = 'users_order.php?act=order_num';
-$modules['06_stats']['visit_buy_per']               = 'visit_sold.php?act=list';
+//$modules['06_stats']['flow_stats']                  = 'flow_stats.php?act=view';
+//$modules['06_stats']['searchengine_stats']          = 'searchengine_stats.php?act=view';
+//$modules['06_stats']['z_clicks_stats']              = 'adsense.php?act=list';
+//$modules['06_stats']['report_guest']                = 'guest_stats.php?act=list';
+$modules['06_stats']['report_order']                = 'order_stats.php?act=list'; //订单统计
+$modules['06_stats']['report_sell']                 = 'sale_general.php?act=list';//销售概况
+$modules['06_stats']['sale_list']                   = 'sale_list.php?act=list'; //销售排行
+$modules['06_stats']['sell_stats']                  = 'sale_order.php?act=goods_num';//销售明细
+$modules['06_stats']['report_users']                = 'users_order.php?act=order_num';//客户统计
+//$modules['06_stats']['visit_buy_per']               = 'visit_sold.php?act=list';
 
-$modules['07_content']['03_article_list']           = 'article.php?act=list';
-$modules['07_content']['02_articlecat_list']        = 'articlecat.php?act=list';
-$modules['07_content']['vote_list']                 = 'vote.php?act=list';
-$modules['07_content']['article_auto']              = 'article_auto.php?act=list';
+//$modules['07_content']['03_article_list']           = 'article.php?act=list';
+//$modules['07_content']['02_articlecat_list']        = 'articlecat.php?act=list';
+//$modules['07_content']['vote_list']                 = 'vote.php?act=list';
+//$modules['07_content']['article_auto']              = 'article_auto.php?act=list';
 //$modules['07_content']['shop_help']                 = 'shophelp.php?act=list_cat';
 //$modules['07_content']['shop_info']                 = 'shopinfo.php?act=list';
 
@@ -97,33 +98,33 @@ $modules['10_priv_admin']['admin_role']             = 'role.php?act=list';
 $modules['10_priv_admin']['agency_list']            = 'agency.php?act=list';
 $modules['10_priv_admin']['suppliers_list']         = 'suppliers.php?act=list'; // 供货商
 
-$modules['11_system']['01_shop_config']             = 'shop_config.php?act=list_edit';
-$modules['11_system']['shop_authorized']             = 'license.php?act=list_edit';
-$modules['11_system']['02_payment_list']            = 'payment.php?act=list';
-$modules['11_system']['03_shipping_list']           = 'shipping.php?act=list';
-$modules['11_system']['04_mail_settings']           = 'shop_config.php?act=mail_settings';
-$modules['11_system']['05_area_list']               = 'area_manage.php?act=list';
+$modules['11_system']['01_shop_config']             = 'shop_config.php?act=list_edit'; //商店设置
+$modules['11_system']['shop_authorized']             = 'license.php?act=list_edit'; //授权证书
+$modules['11_system']['02_payment_list']            = 'payment.php?act=list'; //支付方式
+$modules['11_system']['03_shipping_list']           = 'shipping.php?act=list'; //配送方式
+//$modules['11_system']['04_mail_settings']           = 'shop_config.php?act=mail_settings';
+//$modules['11_system']['05_area_list']               = 'area_manage.php?act=list';
 //$modules['11_system']['06_plugins']                 = 'plugins.php?act=list';
-$modules['11_system']['07_cron_schcron']            = 'cron.php?act=list';
-$modules['11_system']['08_friendlink_list']         = 'friend_link.php?act=list';
-$modules['11_system']['sitemap']                    = 'sitemap.php';
-$modules['11_system']['check_file_priv']            = 'check_file_priv.php?act=check';
-$modules['11_system']['captcha_manage']             = 'captcha_manage.php?act=main';
+//$modules['11_system']['07_cron_schcron']            = 'cron.php?act=list';
+//$modules['11_system']['08_friendlink_list']         = 'friend_link.php?act=list'; //友情链接
+//$modules['11_system']['sitemap']                    = 'sitemap.php';
+//$modules['11_system']['check_file_priv']            = 'check_file_priv.php?act=check'; //文件权限检查
+//$modules['11_system']['captcha_manage']             = 'captcha_manage.php?act=main';//验证码管理
 $modules['11_system']['ucenter_setup']              = 'integrate.php?act=setup&code=ucenter';
-$modules['11_system']['flashplay']                  = 'flashplay.php?act=list';
-$modules['11_system']['navigator']                  = 'navigator.php?act=list';
-$modules['11_system']['file_check']                 = 'filecheck.php';
+$modules['11_system']['flashplay']                  = 'flashplay.php?act=list'; //首页主广告管理
+//$modules['11_system']['navigator']                  = 'navigator.php?act=list'; //自定义导航栏
+//$modules['11_system']['file_check']                 = 'filecheck.php'; //文件校验
 //$modules['11_system']['fckfile_manage']             = 'fckfile_manage.php?act=list';
-$modules['11_system']['021_reg_fields']             = 'reg_fields.php?act=list';
+//$modules['11_system']['021_reg_fields']             = 'reg_fields.php?act=list'; //会员注册项设置
 
 
-$modules['12_template']['02_template_select']       = 'template.php?act=list';
+/*$modules['12_template']['02_template_select']       = 'template.php?act=list'; //模板管理
 $modules['12_template']['03_template_setup']        = 'template.php?act=setup';
 $modules['12_template']['04_template_library']      = 'template.php?act=library';
 $modules['12_template']['05_edit_languages']        = 'edit_languages.php?act=list';
 $modules['12_template']['06_template_backup']       = 'template.php?act=backup_setting';
 $modules['12_template']['mail_template_manage']     = 'mail_template.php?act=list';
-
+*/
 
 $modules['13_backup']['02_db_manage']               = 'database.php?act=backup';
 $modules['13_backup']['03_db_optimize']             = 'database.php?act=optimize';
@@ -142,8 +143,9 @@ $modules['14_sms']['04_sms_sign']                   = 'sms.php?act=sms_sign';
 $modules['15_rec']['affiliate']                     = 'affiliate.php?act=list';
 $modules['15_rec']['affiliate_ck']                  = 'affiliate_ck.php?act=list';
 
-$modules['16_email_manage']['email_list']           = 'email_list.php?act=list';
+/*$modules['16_email_manage']['email_list']           = 'email_list.php?act=list'; //邮件群发管理
 $modules['16_email_manage']['magazine_list']        = 'magazine_list.php?act=list';
 $modules['16_email_manage']['attention_list']       = 'attention_list.php?act=list';
 $modules['16_email_manage']['view_sendlist']        = 'view_sendlist.php?act=list';
+*/
 ?>
