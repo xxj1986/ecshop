@@ -14,6 +14,7 @@ use Gregwar\Captcha\CaptchaBuilder;
 class Auth{
     protected $dev; //设备ID
     protected $redis;
+    protected $obj;
 
     public function __construct()
     {
@@ -28,6 +29,8 @@ class Auth{
         $redis = new Redis();
         $redis->connect(REDIS_HOST,REDIS_PORT);
         $this->redis = $redis;
+
+        $this->obj = new \stdClass();
     }
 
     /*
@@ -54,7 +57,7 @@ class Auth{
             //返回user_id,token
             $this->response(['errcode'=>200,'message'=>'登录成功','data'=>['user_id'=>$user->user_id,'token'=>$token] ]);
         }else{
-            $this->response(['errcode'=>2002,'message'=>'账号或密码错误！','data'=>[] ]);
+            $this->response(['errcode'=>2002,'message'=>'账号或密码错误！','data'=>$this->obj ]);
         }
     }
 
@@ -65,13 +68,13 @@ class Auth{
         //获取签名
         $sign = $request->input('sign');
         if(!$sign){
-            $this->response(['errcode'=>1001,'message'=>'参数错误！','data'=>[] ]);
+            $this->response(['errcode'=>1001,'message'=>'参数错误！','data'=>$this->obj ]);
         }
         //检查签名
         $this->checkSign($request);
         //删除token
         $this->redis->del('token'.$this->dev);
-        $this->response(['errcode'=>200,'message'=>'退出成功','data'=>[] ]);
+        $this->response(['errcode'=>200,'message'=>'退出成功','data'=>$this->obj ]);
     }
 
     public function checkSign(Request $request){
@@ -79,7 +82,7 @@ class Auth{
         //判断是否已经登陆或超时退出
         $token = $this->redis->get('token'.$this->dev);
         if(!$token || strlen($token) != 32){
-            $this->response(['errcode'=>2001,'message'=>'请重新登录','data'=>[] ]);
+            $this->response(['errcode'=>2001,'message'=>'请重新登录','data'=>$this->obj ]);
         }
         //计算签名
         $data = $request->except('sign'); // 获取数据，排除签名
@@ -91,7 +94,7 @@ class Auth{
         //判断签名
         $sign = $request->input('sign');
         if($sign != $correctSign){
-            $this->response(['errcode'=>1002,'message'=>'数字签名错误！','data'=>[] ]);
+            $this->response(['errcode'=>1002,'message'=>'数字签名错误！','data'=>$this->obj ]);
         }
     }
 
@@ -109,36 +112,36 @@ class Auth{
         $captcha = $request->input('captcha');
         //检查验证码
         if(!$captcha){
-            $this->response(['errcode'=>2008,'message'=>'请输入验证码','data'=>[] ]);
+            $this->response(['errcode'=>2008,'message'=>'请输入验证码','data'=>$this->obj ]);
         }
         $cap = $this->redis->get('captcha'.$this->dev);
         if($captcha != $cap){
-            $this->response(['errcode'=>2009,'message'=>'验证码错误','data'=>[] ]);
+            $this->response(['errcode'=>2009,'message'=>'验证码错误','data'=>$this->obj ]);
         }*/
         $code = $request->input('code');
         //检查验证码
         if(!$code){
-            $this->response(['errcode'=>2008,'message'=>'请输入验证码','data'=>[] ]);
+            $this->response(['errcode'=>2008,'message'=>'请输入验证码','data'=>$this->obj ]);
         }
         $regCode = $this->redis->get('regCode'.$mobile);
         if($code != $regCode){
-            //$this->response(['errcode'=>302,'message'=>'验证码不正确','data'=>[] ]);
+            //$this->response(['errcode'=>302,'message'=>'验证码不正确','data'=>$this->obj ]);
         }
         //检查手机号
         if(!$mobile){
-            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>[] ]);
+            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>$this->obj ]);
         }
         $match = "/1[3458]{1}\d{9}$/";
         if(!preg_match($match, $mobile)){
-            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>[] ]);
+            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>$this->obj ]);
         }
         $userInfo = DB::table('users')->where('mobile_phone',$mobile)->first();
         if($userInfo){
-            $this->response(['errcode'=>2006,'message'=>'该手机号已注册','data'=>[] ]);
+            $this->response(['errcode'=>2006,'message'=>'该手机号已注册','data'=>$this->obj ]);
         }
         //检查密码
         if(!$password){
-            $this->response(['errcode'=>2007,'message'=>'请输入密码','data'=>[] ]);
+            $this->response(['errcode'=>2007,'message'=>'请输入密码','data'=>$this->obj ]);
         }
         /*
         // 存redis并设置过期时间
@@ -148,7 +151,7 @@ class Auth{
         $this->redis->expire('regPass'.$this->dev, 10*60);
 
         //发送短信验证码
-        $this->response(['errcode'=>200,'message'=>'提交信息成功','data'=>[] ]);
+        $this->response(['errcode'=>200,'message'=>'提交信息成功','data'=>$this->obj ]);
         */
 
         $data = [
@@ -170,9 +173,9 @@ class Auth{
         //将信息保存到数据库
         $res = DB::table('users')->insert($data);
         if(!$res){
-            $this->response(['errcode'=>2,'message'=>'注册失败','data'=>[] ]);
+            $this->response(['errcode'=>2,'message'=>'注册失败','data'=>$this->obj ]);
         }
-        //$this->response(['errcode'=>200,'message'=>'注册成功','data'=>[] ]);
+        //$this->response(['errcode'=>200,'message'=>'注册成功','data'=>$this->obj ]);
         $this->login($request); //注册后直接登录
     }
 
@@ -182,7 +185,7 @@ class Auth{
     public function confirm(Request $request){
         $code = $request->input('code');
         if(!$code){
-            $this->response(['errcode'=>2008,'message'=>'请输入短信验证码','data'=>[] ]);
+            $this->response(['errcode'=>2008,'message'=>'请输入短信验证码','data'=>$this->obj ]);
         }
         $cache = [
             'mobile_phone' => $this->redis->get('regMobile'.$this->dev),
@@ -190,7 +193,7 @@ class Auth{
         ];
         //验证是否超时
         if(!$cache['mobile_phone']){
-            $this->response(['errcode'=>2,'message'=>'验证超时,请重新注册','data'=>[] ]);
+            $this->response(['errcode'=>2,'message'=>'验证超时,请重新注册','data'=>$this->obj ]);
         }
         $data = [
             'email' => '',
@@ -208,9 +211,9 @@ class Auth{
         //将信息保存到数据库
         $res = DB::table('users')->insert($data);
         if(!$res){
-            $this->response(['errcode'=>2,'message'=>'注册失败','data'=>[] ]);
+            $this->response(['errcode'=>2,'message'=>'注册失败','data'=>$this->obj ]);
         }
-        $this->response(['errcode'=>200,'message'=>'注册成功','data'=>[] ]);
+        $this->response(['errcode'=>200,'message'=>'注册成功','data'=>$this->obj ]);
     }
 
     /*
@@ -235,16 +238,16 @@ class Auth{
         $type = trim($request->input('type'));
         //检查手机号
         if(!$mobile){
-            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>[] ]);
+            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>$this->obj ]);
         }
         $match = "/1[3458]{1}\d{9}$/";
         if(!preg_match($match, $mobile)){
-            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>[] ]);
+            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>$this->obj ]);
         }
         $timer = $this->redis->get('codeTimer'.$mobile);
         if($timer){
             $sec = time() - $timer + 1;
-            $this->response(['errcode'=>300,'message'=>'发送频率过快，请于'.$sec.'后再试','data'=>[] ]);
+            $this->response(['errcode'=>300,'message'=>'发送频率过快，请于'.$sec.'后再试','data'=>$this->obj ]);
         }
         $code = rand(100000,999999);
         switch($type){
@@ -269,9 +272,9 @@ class Auth{
             //设置计数器
             $this->redis->set('codeTimer'.$mobile,time());
             $this->redis->expire('codeTimer'.$mobile, 60); //限制每个手机号发送频率为60秒一次
-            $this->response(['errcode'=>200,'message'=>'该功能暂时没有实现，请随意填写个手机验证码','data'=>[] ]);
+            $this->response(['errcode'=>200,'message'=>'该功能暂时没有实现，请随意填写个手机验证码','data'=>$this->obj ]);
         }
-        else $this->response(['errcode'=>500,'message'=>'发送短信验证码失败','data'=>[] ]);
+        else $this->response(['errcode'=>500,'message'=>'发送短信验证码失败','data'=>$this->obj ]);
     }
 
     /*
@@ -281,17 +284,17 @@ class Auth{
         $mobile = $request->input('mobile');
         //检查手机号
         if(!$mobile){
-            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>[] ]);
+            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>$this->obj ]);
         }
         $match = "/1[3458]{1}\d{9}$/";
         if(!preg_match($match, $mobile)){
-            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>[] ]);
+            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>$this->obj ]);
         }
         $userInfo = DB::table('users')->where('mobile_phone',$mobile)->first();
         if($userInfo){
-            $this->response(['errcode'=>2006,'message'=>'该手机号已注册','data'=>[] ]);
+            $this->response(['errcode'=>2006,'message'=>'该手机号已注册','data'=>$this->obj ]);
         }
-        $this->response(['errcode'=>200,'message'=>'该手机号未注册','data'=>[] ]);
+        $this->response(['errcode'=>200,'message'=>'该手机号未注册','data'=>$this->obj ]);
     }
 
     /*
@@ -304,48 +307,49 @@ class Auth{
 
         //检查手机号
         if(!$mobile){
-            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>[] ]);
+            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>$this->obj ]);
         }
         $match = "/1[3458]{1}\d{9}$/";
         if(!preg_match($match, $mobile)){
-            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>[] ]);
+            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>$this->obj ]);
         }
         if(!$password){
-            $this->response(['errcode'=>302,'message'=>'请输入密码','data'=>[] ]);
+            $this->response(['errcode'=>302,'message'=>'请输入密码','data'=>$this->obj ]);
         }
         if(strlen($password) < 6){
-            $this->response(['errcode'=>302,'message'=>'密码长度至少为6位','data'=>[] ]);
+            $this->response(['errcode'=>302,'message'=>'密码长度至少为6位','data'=>$this->obj ]);
         }
         //检查验证码
         if(!$code){
-            $this->response(['errcode'=>2008,'message'=>'请输入验证码','data'=>[] ]);
+            $this->response(['errcode'=>2008,'message'=>'请输入验证码','data'=>$this->obj ]);
         }
         $regCode = $this->redis->get('rstCode'.$mobile); //获取重置验证码
         if($code != $regCode){
-            //$this->response(['errcode'=>302,'message'=>'验证码不正确','data'=>[] ]);
+            //$this->response(['errcode'=>302,'message'=>'验证码不正确','data'=>$this->obj ]);
         }
         $userInfo = DB::table('users')->where('mobile_phone',$mobile)->first();
         if(!$userInfo){
-            $this->response(['errcode'=>300,'message'=>'该手机号未注册','data'=>[] ]);
+            $this->response(['errcode'=>300,'message'=>'该手机号未注册','data'=>$this->obj ]);
         }
         $newPwd = md5($password);
         if($newPwd == $userInfo->password){
-            $this->response(['errcode'=>200,'message'=>'修改密码成功','data'=>[] ]);
+            $this->response(['errcode'=>200,'message'=>'修改密码成功','data'=>$this->obj ]);
         }
         $res = DB::table('users')->where('mobile_phone',$mobile)->update(['password'=>$newPwd]);
         if($res){
             $this->redis->del('rstCode'.$mobile);
-            $this->response(['errcode'=>200,'message'=>'修改密码成功','data'=>[] ]);
+            $this->response(['errcode'=>200,'message'=>'修改密码成功','data'=>$this->obj ]);
         }
-        $this->response(['errcode'=>300,'message'=>'修改密码失败','data'=>[] ]);
+        $this->response(['errcode'=>300,'message'=>'修改密码失败','data'=>$this->obj ]);
     }
 
     /*
      * 输出函数
      */
-    public function response($data=['errcode'=>1002,'message'=>'action not found','data'=>[] ]){
+    public function response($data=['errcode'=>1002,'message'=>'action not found' ]){
+        if(!isset($data['data'])) $data['data'] = $this->obj;
         header('Content-type:text/json');
-        die(json_encode($data));
+        die(json_encode($data,true));
     }
 }
 
