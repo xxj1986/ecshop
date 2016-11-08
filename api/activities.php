@@ -38,7 +38,7 @@ class Activities extends Sign{
         if($oneInfo){
             $data = ['errcode' => 200, 'message' => '获取详情信息成功', 'data'=>$oneInfo];
         }else{
-            $data = ['errcode' => 404, 'message' => '没有找到对应活动信息', 'data'=>[]];
+            $data = ['errcode' => 404, 'message' => '没有找到对应活动信息', 'data'=>$this->obj];
         }
         $this->response($data);
     }
@@ -57,7 +57,7 @@ class Activities extends Sign{
             $data = [
                 'errcode' => 404,
                 'message' => '没有找到对应活动信息',
-                'data'=>[]
+                'data'=>$this->obj
             ];
             $this->response($data);
         }
@@ -65,7 +65,7 @@ class Activities extends Sign{
             $data = [
                 'errcode' => 3000,
                 'message' => '该活动报名已结束',
-                'data'=>[]
+                'data'=>$this->obj
             ];
             $this->response($data);
         }
@@ -76,9 +76,9 @@ class Activities extends Sign{
             $res = DB::table('activity_users')->insert(compact('active_id','num','user_id'));
         }
         if($res){
-            $data = ['errcode' => 200, 'message' => '报名成功', 'data'=>[] ];
+            $data = ['errcode' => 200, 'message' => '报名成功', 'data'=>$this->obj ];
         }else{
-            $data = ['errcode' => 500, 'message' => '报名失败', 'data'=>[] ];
+            $data = ['errcode' => 500, 'message' => '报名失败', 'data'=>$this->obj ];
         }
         $this->response($data);
     }
@@ -91,9 +91,9 @@ class Activities extends Sign{
         $user_id = intval($request->input('user_id'));
         $res = DB::table('activity_users')->where(['active_id'=>$active_id,'user_id'=>$user_id])->delete();
         if($res){
-            $data = ['errcode' => 200, 'message' => '取消报名成功', 'data'=>[] ];
+            $data = ['errcode' => 200, 'message' => '取消报名成功', 'data'=>$this->obj ];
         }else{
-            $data = ['errcode' => 500, 'message' => '取消报名失败', 'data'=>[] ];
+            $data = ['errcode' => 500, 'message' => '取消报名失败', 'data'=>$this->obj ];
         }
         $this->response($data);
     }

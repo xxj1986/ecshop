@@ -14,11 +14,10 @@ class UserAddress extends Sign{
         $user_id = intval($request->input('user_id'));
         $lists = DB::table('user_address')->where('user_id',$user_id)->get();
         if(count($lists)){
-            $lists = $lists->toArray();
             $message = '获取收货人信息成功';
         }else{
             $message = '暂无数据';
-            $lists = [];
+            $lists = $this->obj;
         }
         $data = ['errcode' => 200, 'message' => $message, 'data'=>$lists];
         $this->response($data);
@@ -35,7 +34,7 @@ class UserAddress extends Sign{
             $data = ['errcode' => 200, 'message' => $message, 'data'=>$defInfo];
         }else{
             $message = '您还没有设置默认收货人';
-            $data = ['errcode' => 404, 'message' => $message, 'data'=>[]];
+            $data = ['errcode' => 404, 'message' => $message, 'data'=>$this->obj];
         }
         $this->response($data);
     }
@@ -52,7 +51,7 @@ class UserAddress extends Sign{
         if($res){
             $data = ['errcode' => 200, 'message' => '设置默认地址成功', 'data'=>['new_id'=>$address_id]];
         }else{
-            $data = ['errcode' => 500, 'message' => '设置默认地址失败', 'data'=>[]];
+            $data = ['errcode' => 500, 'message' => '设置默认地址失败', 'data'=>$this->obj];
         }
         $this->response($data);
     }
@@ -67,7 +66,7 @@ class UserAddress extends Sign{
         if($res){
             $data = ['errcode' => 200, 'message' => '删除收货人信息成功', 'data'=>['del_id'=>$address_id]];
         }else{
-            $data = ['errcode' => 500, 'message' => '删除收货人信息失败', 'data'=>[]];
+            $data = ['errcode' => 500, 'message' => '删除收货人信息失败', 'data'=>$this->obj];
         }
         $this->response($data);
     }
@@ -79,11 +78,11 @@ class UserAddress extends Sign{
         //获取输入的信息
         $user_id = intval($request->input('user_id'));
         if(!$user_id){
-            $this->response(['errcode'=>1001,'message'=>'参数错误','data'=>[] ]);
+            $this->response(['errcode'=>1001,'message'=>'参数错误','data'=>$this->obj ]);
         }
         $num = DB::table('user_address')->where('user_id',$user_id)->count();
         if($num >= 5){
-            $this->response(['errcode'=>300,'message'=>'您最多只能保留5条收货人信息','data'=>[] ]);
+            $this->response(['errcode'=>300,'message'=>'您最多只能保留5条收货人信息','data'=>$this->obj ]);
         }
         $setDef = trim($request->input('setDef'));
         //验证输入信息
@@ -98,9 +97,9 @@ class UserAddress extends Sign{
         //保存地址
         $res = DB::table('user_address')->insert($data);
         if($res){
-            $data = ['errcode' => 200, 'message' => '新增收货人信息成功', 'data'=>[] ];
+            $data = ['errcode' => 200, 'message' => '新增收货人信息成功', 'data'=>$this->obj ];
         }else{
-            $data = ['errcode' => 500, 'message' => '新增收货人信息失败', 'data'=>[] ];
+            $data = ['errcode' => 500, 'message' => '新增收货人信息失败', 'data'=>$this->obj ];
         }
         $this->response($data);
     }
@@ -113,13 +112,13 @@ class UserAddress extends Sign{
         $data = $this->checkInput($request);
         $address_id = intval($request->input('address_id'));
         if(!$address_id){
-            $this->response(['errcode'=>1001,'message'=>'参数错误','data'=>[] ]);
+            $this->response(['errcode'=>1001,'message'=>'参数错误','data'=>$this->obj ]);
         }
         $res = DB::table('user_address')->where('address_id',$address_id)->update($data);
         if($res){
-            $data = ['errcode' => 200, 'message' => '修改收货人信息成功', 'data'=>[] ];
+            $data = ['errcode' => 200, 'message' => '修改收货人信息成功', 'data'=>$this->obj ];
         }else{
-            $data = ['errcode' => 500, 'message' => '收货人信息无修改', 'data'=>[] ];
+            $data = ['errcode' => 500, 'message' => '收货人信息无修改', 'data'=>$this->obj ];
         }
         $this->response($data);
     }
@@ -129,17 +128,17 @@ class UserAddress extends Sign{
         $consignee = trim($request->input('name'));
         $address = trim($request->input('address'));
         if(!$mobile){
-            $this->response(['errcode'=>302,'message'=>'请输入手机号','data'=>[] ]);
+            $this->response(['errcode'=>302,'message'=>'请输入手机号','data'=>$this->obj ]);
         }
         $match = "/1[3458]{1}\d{9}$/";
         if(!preg_match($match, $mobile)){
-            $this->response(['errcode'=>302,'message'=>'手机号不正确','data'=>[] ]);
+            $this->response(['errcode'=>302,'message'=>'手机号不正确','data'=>$this->obj ]);
         }
         if(!$consignee){
-            $this->response(['errcode'=>302,'message'=>'请输入收货人姓名','data'=>[] ]);
+            $this->response(['errcode'=>302,'message'=>'请输入收货人姓名','data'=>$this->obj ]);
         }
         if(!$address){
-            $this->response(['errcode'=>302,'message'=>'请输入收货人地址','data'=>[] ]);
+            $this->response(['errcode'=>302,'message'=>'请输入收货人地址','data'=>$this->obj ]);
         }
         return compact('consignee','mobile','address');
     }
