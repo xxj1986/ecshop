@@ -438,7 +438,7 @@ class Auth{
             //文件类型验证代码
             $allowType = ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'swf'];
             if(!in_array($ext,$allowType)){
-                $this->response(['errcode'=>300,'message'=>'请上传正确的图片','data'=>$this->obj ]);
+                $this->response(['errcode'=>300,'message'=>'别糊弄我，请上传图片','data'=>$this->obj ]);
             }
             //保存图片
             $culpturePath = '/images/upload/Culpture/';
@@ -453,6 +453,8 @@ class Auth{
                 }else{
                     $this->response(['errcode'=>500,'message'=>'修改头像失败','data'=>$this->obj ]);
                 }
+            }else{
+                $this->response(['errcode'=>500,'message'=>'文件保存失败','data'=>$this->obj ]);
             }
         }else{
             $this->response(['errcode'=>300,'message'=>'请上传图片','data'=>$this->obj ]);
