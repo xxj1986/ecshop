@@ -438,6 +438,8 @@ switch($act){
     case 'register': $auth->register($request);    break;
     case 'createSmsCode': $auth->createSmsCode($request);      break;
     case 'resetPassword': $auth->resetPassword($request);      break;
+    case 'chPwd': $auth->chPwd($request);          break;
+    case 'chMobile': $auth->chMobile($request);    break;
     case 'createCaptcha': $auth->createCaptcha();  break;
     default: $auth->response();
 }
