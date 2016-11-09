@@ -55,7 +55,7 @@ class Auth{
             //$this->db->table('users')->where('user_id',$user->user_id)->update(['last_login'=>time()]);
             DB::table('users')->where('user_id',$user->user_id)->update(['last_login'=>time()]);
             //返回user_id,token
-            $this->response(['errcode'=>200,'message'=>'登录成功','data'=>['user_id'=>$user->user_id,'token'=>$token] ]);
+            $this->response(['errcode'=>200,'message'=>'登录成功','data'=>['user_id'=>$user->user_id,'token'=>$token,'pattern_on'=>$user->pattern_on ] ]);
         }else{
             $this->response(['errcode'=>2002,'message'=>'账号或密码错误！','data'=>$this->obj ]);
         }
@@ -418,6 +418,14 @@ class Auth{
     }
 
     /*
+     * 上传头像
+     */
+    public function uploadCulpture(Request $request){
+        $culpture = $request->file('culpture');
+        dd($culpture);
+    }
+
+    /*
      * 输出函数
      */
     public function response($data=['errcode'=>1002,'message'=>'action not found' ]){
@@ -440,6 +448,7 @@ switch($act){
     case 'resetPassword': $auth->resetPassword($request);      break;
     case 'chPwd': $auth->chPwd($request);          break;
     case 'chMobile': $auth->chMobile($request);    break;
+    case 'uploadCulpture': $auth->uploadCulpture($request);    break;
     case 'createCaptcha': $auth->createCaptcha();  break;
     default: $auth->response();
 }
