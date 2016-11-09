@@ -261,6 +261,11 @@ class Auth{
                 $this->redis->set('rstCode'.$mobile,$code);
                 $this->redis->expire('rstCode'.$mobile, 10*60);
                 break;
+            case 'chMobile':
+                $message = "您更改新手机号的证码是$code,10分钟内输入有效";
+                $this->redis->set('chmCode'.$mobile,$code);
+                $this->redis->expire('chmCode'.$mobile, 10*60);
+                break;
             default:
                 $message = "您的证码是$code,10分钟内输入有效";
                 $this->redis->set('defCode'.$mobile,$code);
@@ -341,6 +346,75 @@ class Auth{
             $this->response(['errcode'=>200,'message'=>'修改密码成功','data'=>$this->obj ]);
         }
         $this->response(['errcode'=>300,'message'=>'修改密码失败','data'=>$this->obj ]);
+    }
+
+    /*
+     * 修改密码
+     */
+    public function chPwd(Request $request){
+        $password = trim(strval($request->input('password')));
+        $newPwd  = trim(strval($request->input('newPwd')));
+        $confPwd = trim(strval($request->input('confPwd')));
+        $user_id = intval($request->input('user_id'));
+        //检查数据
+        if(!$password){
+            $this->response(['errcode'=>302,'message'=>'请输入旧密码','data'=>$this->obj ]);
+        }
+        if(!$newPwd){
+            $this->response(['errcode'=>302,'message'=>'新密码不能为空','data'=>$this->obj ]);
+        }
+        if(strlen($newPwd) < 6){
+            $this->response(['errcode'=>302,'message'=>'新密码长度至少为6位','data'=>$this->obj ]);
+        }
+        if($newPwd != $confPwd){
+            $this->response(['errcode'=>302,'message'=>'新密码和确认密码不一致','data'=>$this->obj ]);
+        }
+        //检查账号
+        $userInfo = DB::table('users')->where(['user_id'=>$user_id,'password'=>md5($password)])->first();
+        if(!$userInfo){
+            $this->response(['errcode'=>300,'message'=>'旧密码不正确','data'=>$this->obj ]);
+        }
+        //更新密码
+        $res = DB::table('users')->where(['user_id'=>$user_id])->update(['password'=>md5($newPwd)]);
+        if($res){
+            $this->response(['errcode'=>200,'message'=>'修改密码成功','data'=>$this->obj ]);
+        }else{
+            $this->response(['errcode'=>500,'message'=>'修改密码失败','data'=>$this->obj ]);
+        }
+    }
+
+    /*
+     * 修改手机号
+     */
+    public function chMobile(Request $request){
+        $mobile = trim($request->input('mobile'));
+        $password = trim(strval($request->input('password')));
+        $user_id = intval($request->input('user_id'));
+        $code = trim($request->input('code'));
+        //检查数据
+        if(!$mobile){
+            $this->response(['errcode'=>2004,'message'=>'新手机号不能为空','data'=>$this->obj ]);
+        }
+        $match = "/1[3458]{1}\d{9}$/";
+        if(!preg_match($match, $mobile)){
+            $this->response(['errcode'=>2005,'message'=>'新手机号不正确','data'=>$this->obj ]);
+        }
+        $regCode = $this->redis->get('chmCode'.$mobile); //获取重置验证码
+        if($code != $regCode){
+            //$this->response(['errcode'=>302,'message'=>'验证码不正确','data'=>$this->obj ]);
+        }
+        //检查账号
+        $userInfo = DB::table('users')->where(['user_id'=>$user_id,'password'=>md5($password)])->first();
+        if(!$userInfo){
+            $this->response(['errcode'=>300,'message'=>'密码不正确','data'=>$this->obj ]);
+        }
+        //更新手机号
+        $res = DB::table('users')->where(['user_id'=>$user_id])->update(['mobile_phone'=>$mobile]);
+        if($res){
+            $this->response(['errcode'=>200,'message'=>'修改手机号成功','data'=>$this->obj ]);
+        }else{
+            $this->response(['errcode'=>500,'message'=>'修改手机号失败','data'=>$this->obj ]);
+        }
     }
 
     /*
