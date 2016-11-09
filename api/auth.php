@@ -421,8 +421,42 @@ class Auth{
      * 上传头像
      */
     public function uploadCulpture(Request $request){
+        //验证输入数据
+        $token = trim($request->input('token'));
+        $user_id = intval($request->input('user_id'));
+        $histToken = $this->redis->get('token'.$this->dev);
+        if(!$histToken){
+            $this->response(['errcode'=>1,'message'=>'请重新登录','data'=>$this->obj ]);
+        }
+        if($histToken != $token){
+            $this->response(['errcode'=>300,'message'=>'非法操作！','data'=>$this->obj ]);
+        }
         $culpture = $request->file('culpture');
-        dd($culpture);
+        if ($culpture->isValid()){
+            $file = $culpture->getRealPath();
+            $ext = $culpture->getClientOriginalExtension();
+            //文件类型验证代码
+            $allowType = ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'swf'];
+            if(!in_array($ext,$allowType)){
+                $this->response(['errcode'=>300,'message'=>'请上传正确的图片','data'=>$this->obj ]);
+            }
+            //保存图片
+            $culpturePath = '/images/upload/Culpture/';
+            $fileName = date('YmdHis') .'-'. uniqid() .'.'.$ext;
+            $res = move_uploaded_file($file,__DIR__.'/..'.$culpturePath.$fileName);
+            if($res){ //图片保存成功
+                $result = DB::table('users')->where('user_id',$user_id)->update(['head_culpture'=>$culpturePath.$fileName]);
+                if($result){
+                    $this->response(['errcode'=>200,'message'=>'修改头像成功',
+                        'data'=>['new_url'=>$culpturePath.$fileName] ]
+                    );
+                }else{
+                    $this->response(['errcode'=>500,'message'=>'修改头像失败','data'=>$this->obj ]);
+                }
+            }
+        }else{
+            $this->response(['errcode'=>300,'message'=>'请上传图片','data'=>$this->obj ]);
+        }
     }
 
     /*
