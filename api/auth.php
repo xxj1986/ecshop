@@ -442,7 +442,7 @@ class Auth{
             $this->response(['errcode'=>300,'message'=>'非法操作！','data'=>$this->obj ]);
         }
         $culpture = $request->file('culpture');
-        if ($culpture->isValid()){
+        if ($culpture){
             $file = $culpture->getRealPath();
             $ext = $culpture->getClientOriginalExtension();
             //文件类型验证代码
@@ -452,8 +452,12 @@ class Auth{
             }
             //保存图片
             $culpturePath = '/images/upload/Culpture/';
+            $picPath = __DIR__.'/..'.$culpturePath;
+            if(!is_writeable($picPath)){
+                $this->response(['errcode'=>500,'message'=>'目录不可写','data'=>$this->obj ]);
+            }
             $fileName = date('YmdHis') .'-'. uniqid() .'.'.$ext;
-            $res = move_uploaded_file($file,__DIR__.'/..'.$culpturePath.$fileName);
+            $res = move_uploaded_file($file, $picPath.$fileName);
             if($res){ //图片保存成功
                 $result = DB::table('users')->where('user_id',$user_id)->update(['head_culpture'=>$culpturePath.$fileName]);
                 if($result){
