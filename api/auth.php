@@ -65,6 +65,7 @@ class Auth{
      * 退出
      */
     public function logout(Request $request){
+        /*
         //获取签名
         $sign = $request->input('sign');
         if(!$sign){
@@ -72,6 +73,15 @@ class Auth{
         }
         //检查签名
         $this->checkSign($request);
+        */
+        $token = trim($request->input('token'));
+        $histToken = $this->redis->get('token'.$this->dev);
+        if(!$histToken){
+            $this->response(['errcode'=>1,'message'=>'请重新登录','data'=>$this->obj ]);
+        }
+        if($histToken != $token){
+            $this->response(['errcode'=>300,'message'=>'非法操作！','data'=>$this->obj ]);
+        }
         //删除token
         $this->redis->del('token'.$this->dev);
         $this->response(['errcode'=>200,'message'=>'退出成功','data'=>$this->obj ]);
