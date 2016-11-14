@@ -32,44 +32,19 @@ class Goods
     protected $dev; //设备ID
     protected $redis;
 
-    public function __construct()
-    {
-        //捕获输入信息
-        $request = Request::capture();
+    public function __construct(){
         //定义错误消息
         //$this->dev = isset($_REQUEST['device']) ? trim($_REQUEST['device']):function ($res) {$this->response($res);};
         //连接redis
         //$redis = new Redis();
         //$redis->connect(REDIS_HOST, REDIS_PORT);
         //$this->redis = $redis;
-
-        //参数路由
-        $act = $request->input('act');
-        switch ($act) {
-            case 'get_lists':
-                $this->get_lists($request);
-                break;
-            case 'get_goods_lists':
-                $this->get_goods_lists($request);
-                break;
-            case 'get_goods_info':
-                $this->get_goods_info($request);
-                break;
-            case 'get_search':
-                $this->get_search($request);
-                break;
-            case 'get_goods_attribute':
-                $this->get_goods_attribute($request);
-                break;
-            default:
-                $this->response();
-        }
     }
 
     /*
      * 获取首页数据
      */
-    private function get_lists(Request $request){
+    public function get_lists(Request $request){
         $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
         //banner图数据
         $bannerData = DB::table("ad_custom")
@@ -132,7 +107,7 @@ class Goods
     /*
      * 获取产品列表信息
      */
-    private function get_goods_lists(Request $request){
+    public function get_goods_lists(Request $request){
         $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
         $record = $request->input('record')?$request->input('record'):10;
         $page = $request->input('page')?$request->input('page'):1;
@@ -178,7 +153,7 @@ class Goods
     /**
      * 获取商品信息 包括熟悉，相册和基本信息
      */
-    private function get_goods_info(Request $request){
+    public function get_goods_info(Request $request){
         $goods_id = $request->input('id')?$request->input('id'):0;
         if($goods_id>0){
             $goods = DB::table('goods')
@@ -274,7 +249,7 @@ class Goods
     /**
      * 获取商品对应相册数据
      */
-    private function get_goods_comment($goods_id){
+    public function get_goods_comment($goods_id){
         $comments = [];
         if ($goods_id>0) {
             $contents = DB::table('comment')
@@ -298,7 +273,7 @@ class Goods
     /**
      * 获取商品对应的属性信息
      */
-    private function get_search(Request $request){
+    public function get_search(Request $request){
         $goods_name = $request->input('word')?$request->input('word'):'红酒';
         $goods = DB::table('goods')
             ->where('goods_name','like','%'.$goods_name.'%')  //where('name', 'like', 'T%')
@@ -339,4 +314,27 @@ class Goods
 
 $Goods = new Goods();
 
+//捕获输入信息
+$request = Request::capture();
+//参数路由
+$act = $request->input('act');
+switch ($act) {
+    case 'get_lists':
+        $this->get_lists($request);
+        break;
+    case 'get_goods_lists':
+        $this->get_goods_lists($request);
+        break;
+    case 'get_goods_info':
+        $this->get_goods_info($request);
+        break;
+    case 'get_search':
+        $this->get_search($request);
+        break;
+    case 'get_goods_attribute':
+        $this->get_goods_attribute($request);
+        break;
+    default:
+        $this->response();
+}
 ?>

@@ -21,10 +21,7 @@ class Order
     protected $dev; //设备ID
     protected $redis;
 
-    public function __construct()
-    {
-        //捕获输入信息
-        $request = Request::capture();
+    public function __construct(){
         //定义错误消息
         //$this->dev = isset($_REQUEST['device']) ? trim($_REQUEST['device']):function ($res) {$this->response($res);};
         //连接redis
@@ -32,32 +29,12 @@ class Order
         //$redis->connect(REDIS_HOST, REDIS_PORT);
         //$this->redis = $redis;
         //echo $request->method();
-        //参数路由
-        $act = $request->input('act');
-        switch ($act) {
-            case 'set_cart':
-                $this->set_cart($request);
-                break;
-            case 'get_cart_infos':
-                $this->get_cart_infos($request);
-                break;
-            case 'update_cart_infos':
-                $this->update_cart($request);
-                break;
-            case 'delete_cart':
-                $this->delete_cart($request);
-                break;
-            default:
-                $this->response();
-        }
     }
-
 
     /*
      * 添加购物车信息
      */
-    private function set_cart(Request $request)
-    {
+    public function set_cart(Request $request){
         $goods_id = $request->input('goods_id') ? $request->input('goods_id') : 0;
         $goods_num = $request->input('goods_num') ? $request->input('goods_num') : 0;
         $user = $request->input('user') ? $request->input('user') : 0;
@@ -105,8 +82,7 @@ class Order
     /**
      * 获取购物车信息
      */
-    private function get_cart_infos(Request $request)
-    {
+    public function get_cart_infos(Request $request){
         $user = $request->input('user') ? $request->input('user') : 0;
         if ($user > 0) {
             $carts = DB::table('cart')
@@ -144,8 +120,7 @@ class Order
     /**
      * 更新购物车信息
      */
-    private function update_cart(Request $request)
-    {
+    public function update_cart(Request $request){
         $goods_id = $request->input('id') ? $request->input('id') : 0;
         if ($goods_id > 0) {
             $attrs = DB::table('goods_attr')
@@ -173,8 +148,7 @@ class Order
     /**
      * 删除对应购物车信息
      */
-    private function delete_cart(Request $request)
-    {
+    public function delete_cart(Request $request){
         $cart_id = $request->input('cid') ? $request->input('cid') :0;
 
         $state = DB::table('cart')
@@ -191,16 +165,82 @@ class Order
         $this->response($res);
     }
 
+    /*
+     * 添加订单信息
+     */
+    public function addOrder(Request $request){
+        $goods_id = $request->input('goods_id') ? $request->input('goods_id') : 0;
+        $goods_num = $request->input('goods_num') ? $request->input('goods_num') : 0;
+        $user = $request->input('user') ? $request->input('user') : 0;
+
+        if ($goods_id > 0 && $goods_num > 0 && $user > 0) {
+            $goodsInfo = DB::table('goods')
+                ->select('goods_sn', 'goods_name', 'goods_id', 'market_price', 'shop_price')
+                ->where('is_delete', 0)
+                ->where('goods_id', $goods_id)
+                ->first();
+            if ($goodsInfo) {
+                $id = DB::table('cart')->insertGetId(
+                    ['user_id' => $user,
+                        'goods_id' => $goods_id,
+                        'goods_sn' => $goodsInfo->goods_sn,
+                        'goods_name' => $goodsInfo->goods_name,
+                        'market_price' => $goodsInfo->market_price,
+                        'goods_price' => $goodsInfo->shop_price,
+                        'goods_number' => $goods_num,
+                        'is_real' => 1
+                    ]
+                );
+                if ($id) {
+                    $res['errcode'] = '200';
+                    $res['message'] = '添加购物车成功！';
+                    $res['data'] = [];
+                } else {
+                    $res['errcode'] = '10001';
+                    $res['message'] = '添加购物车失败！';
+                    $res['data'] = [];
+                }
+            } else {
+                $res['errcode'] = '10002';
+                $res['message'] = '所选商品信息有误！';
+                $res['data'] = [];
+            }
+        } else {
+            $res['errcode'] = '10003';
+            $res['message'] = '提交参数信息有误！';
+            $res['data'] = [];
+        }
+        $this->response($res);
+    }
 
     /*
      * 输出函数
      */
-    public function response($res = ['errcode' => '2001', 'message' => 'action not found', 'data' => []])
-    {
+    public function response($res = ['errcode' => '2001', 'message' => 'action not found', 'data' => []]){
         header('Content-type:text/json');
         die(json_encode($res));
     }
 }
 $Order = new Order();
 
+//捕获输入信息
+$request = Request::capture();
+//参数路由
+$act = $request->input('act');
+switch ($act) {
+    case 'set_cart':
+        $this->set_cart($request);
+        break;
+    case 'get_cart_infos':
+        $this->get_cart_infos($request);
+        break;
+    case 'update_cart_infos':
+        $this->update_cart($request);
+        break;
+    case 'delete_cart':
+        $this->delete_cart($request);
+        break;
+    default:
+        $this->response();
+}
 ?>
