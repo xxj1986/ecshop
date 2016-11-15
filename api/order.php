@@ -229,18 +229,18 @@ $request = Request::capture();
 $act = $request->input('act');
 switch ($act) {
     case 'set_cart':
-        $this->set_cart($request);
+        $Order->set_cart($request);
         break;
     case 'get_cart_infos':
-        $this->get_cart_infos($request);
+        $Order->get_cart_infos($request);
         break;
     case 'update_cart_infos':
-        $this->update_cart($request);
+        $Order->update_cart($request);
         break;
     case 'delete_cart':
-        $this->delete_cart($request);
+        $Order->delete_cart($request);
         break;
     default:
-        $this->response();
+        $Order->response();
 }
 ?>

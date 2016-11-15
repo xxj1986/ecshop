@@ -320,21 +320,18 @@ $request = Request::capture();
 $act = $request->input('act');
 switch ($act) {
     case 'get_lists':
-        $this->get_lists($request);
+        $Goods->get_lists($request);
         break;
     case 'get_goods_lists':
-        $this->get_goods_lists($request);
+        $Goods->get_goods_lists($request);
         break;
     case 'get_goods_info':
-        $this->get_goods_info($request);
+        $Goods->get_goods_info($request);
         break;
     case 'get_search':
-        $this->get_search($request);
-        break;
-    case 'get_goods_attribute':
-        $this->get_goods_attribute($request);
+        $Goods->get_search($request);
         break;
     default:
-        $this->response();
+        $Goods->response();
 }
 ?>
