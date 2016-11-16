@@ -458,7 +458,7 @@ class Auth{
             $fileName = date('YmdHis') .'-'. uniqid() .'.'.$ext;
             $res = move_uploaded_file($file, $picPath.$fileName);
             if($res){ //图片保存成功
-                $result = DB::table('users')->where('user_id',$user_id)->update(['head_culpture'=>$_SERVER['HTTP_HOST '].$culpturePath.$fileName]);
+                $result = DB::table('users')->where('user_id',$user_id)->update(['head_culpture'=>$_SERVER['HTTP_HOST'].$culpturePath.$fileName]);
                 if($result){
                     $this->response(['errcode'=>200,'message'=>'修改头像成功',
                         'data'=>['new_url'=>$culpturePath.$fileName] ]
