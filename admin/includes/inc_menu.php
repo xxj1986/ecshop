@@ -61,9 +61,9 @@ $modules['04_order']['08_add_order']                = 'order.php?act=add'; //添
 $modules['04_order']['09_delivery_order']           = 'order.php?act=delivery_list'; //发货单列表
 $modules['04_order']['10_back_order']               = 'order.php?act=back_list'; //退货单列表
 
-/*$modules['05_banner']['ad_position']                = 'ad_position.php?act=list'; //广告列表
-$modules['05_banner']['ad_list']                    = 'ads.php?act=list';
-*/
+//$modules['05_banner']['ad_position']                = 'ad_position.php?act=list';
+$modules['05_banner']['ad_list']                    = 'ads.php?act=list';//广告列表
+$modules['05_banner']['flashplay']                  = 'flashplay.php?act=list'; //首页主广告管理
 
 //$modules['06_stats']['flow_stats']                  = 'flow_stats.php?act=view';
 //$modules['06_stats']['searchengine_stats']          = 'searchengine_stats.php?act=view';
@@ -111,7 +111,6 @@ $modules['11_system']['03_shipping_list']           = 'shipping.php?act=list'; /
 //$modules['11_system']['check_file_priv']            = 'check_file_priv.php?act=check'; //文件权限检查
 //$modules['11_system']['captcha_manage']             = 'captcha_manage.php?act=main';//验证码管理
 $modules['11_system']['ucenter_setup']              = 'integrate.php?act=setup&code=ucenter';
-$modules['11_system']['flashplay']                  = 'flashplay.php?act=list'; //首页主广告管理
 //$modules['11_system']['navigator']                  = 'navigator.php?act=list'; //自定义导航栏
 //$modules['11_system']['file_check']                 = 'filecheck.php'; //文件校验
 //$modules['11_system']['fckfile_manage']             = 'fckfile_manage.php?act=list';
