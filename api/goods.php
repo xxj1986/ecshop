@@ -48,7 +48,7 @@ class Goods
         $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
         //banner图数据
         $bannerData = DB::table("ad_custom")
-            ->select('content','url')
+            ->select('content','url','ad_name')
             ->orderBy('ad_id','DESC')
             ->get();
 
@@ -56,6 +56,7 @@ class Goods
             $banners = array();
             foreach ($bannerData as $banner) {
                 $data['url'] = (!empty($banner->url))?$banner->url:'';
+                $data['title'] = (!empty($banner->ad_name))?$banner->ad_name:'';
                 $data['path'] = (!empty($banner->content))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$banner->content:'';
                 $banners[] = $data;
             }
