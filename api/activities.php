@@ -21,6 +21,7 @@ class Activities extends Sign{
         $this->response($data);
     }
 
+
     public function listLive(Request $request){
         $lists = DB::table('activities')->where('active_status',0)->orderBy('id','DESC')->paginate();
         if(count($lists)){
