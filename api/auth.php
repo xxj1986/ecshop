@@ -48,9 +48,8 @@ class Auth{
             //绑定user_id和device
             $this->redis->hset('id2dev', $user->user_id, $this->dev);
             $this->redis->hset('dev2id', $this->dev, $user->user_id);
-            //保存token,设置超时时间20秒
+            //保存token
             $this->redis->set('token'.$this->dev, $token);
-            $this->redis->expire('token'.$this->dev, 20*60);
             //更新最后登陆时间
             //$this->db->table('users')->where('user_id',$user->user_id)->update(['last_login'=>time()]);
             DB::table('users')->where('user_id',$user->user_id)->update(['last_login'=>time()]);

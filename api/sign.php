@@ -28,7 +28,7 @@ class Sign{
         //$this->checkSign($request);
 
         //更新过期时间
-        $this->redis->expire('token'.$this->dev, 20*60);
+        //$this->redis->expire('token'.$this->dev, 20*60);
         $this->obj = new \stdClass();
     }
     /*
