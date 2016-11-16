@@ -67,7 +67,6 @@ class Sign{
             $this->response(['errcode'=>1,'message'=>'数字签名错误！','data'=>$this->obj ]);
         }
     }
-
     /*
      * 输出函数
      */
