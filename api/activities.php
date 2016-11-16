@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class Activities extends Sign{
 
     public function listAll(Request $request){
-        $lists = DB::table('activities')->where('active_status',0)->orderBy('id','DESC')->get();
+        $lists = DB::table('activities')->orderBy('id','DESC')->paginate();
         if(count($lists)){
             $message = '获取详情信息成功';
         }else{
@@ -22,7 +22,7 @@ class Activities extends Sign{
     }
 
     public function listLive(Request $request){
-        $lists = DB::table('activities')->where('active_status',0)->orderBy('id','ASC')->paginate();
+        $lists = DB::table('activities')->where('active_status',0)->orderBy('id','DESC')->paginate();
         if(count($lists)){
             $message = '获取详情信息成功';
         }else{
