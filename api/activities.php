@@ -34,13 +34,18 @@ class Activities extends Sign{
 
     public function details(Request $request){
         $active_id = intval($request->input('active_id'));
+        $display = trim($request->input('active_id'));
         $oneInfo = DB::table('activities')->where('id',$active_id)->first();
         if($oneInfo){
             $data = ['errcode' => 200, 'message' => '获取详情信息成功', 'data'=>$oneInfo];
         }else{
             $data = ['errcode' => 404, 'message' => '没有找到对应活动信息', 'data'=>$this->obj];
         }
-        $this->response($data);
+        if($display == 'h5'){
+            dd($oneInfo);
+        }else{
+            $this->response($data);
+        }
     }
 
     /*
