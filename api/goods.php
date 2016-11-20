@@ -55,13 +55,24 @@ class Goods
         if($bannerData){
             $banners = array();
             foreach ($bannerData as $banner) {
-                $data['url'] = (!empty($banner->url))?$banner->url:'';
+                $data['url']   = (!empty($banner->url))?$banner->url:'';
                 $data['title'] = (!empty($banner->ad_name))?$banner->ad_name:'';
-                $data['path'] = (!empty($banner->content))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$banner->content:'';
+                $data['path']  = (!empty($banner->content))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$banner->content:'';
                 $banners[] = $data;
             }
         }
         $res['data']['banners'] = $banners;
+
+        $adData = DB::table("ad")
+            ->where('enabled',1)
+            ->select('ad_name','ad_link','ad_code')
+            ->orderBy('ad_id','DESC')
+            ->first();
+
+        $ad['title'] = (!empty($adData->ad_name))?$adData->ad_name:'';
+        $ad['url']   = (!empty($adData->ad_link))?$adData->ad_link:'';
+        $ad['path']  = (!empty($adData->ad_code))?'http://'.$_SERVER['SERVER_NAME'].'/data/afficheimg/'.$adData->ad_code:'';
+        $res['data']['ad'] = $ad;
 
         // 商品数据
         $goods_list = DB::table('goods')
