@@ -39,6 +39,7 @@ class Goods
         //$redis = new Redis();
         //$redis->connect(REDIS_HOST, REDIS_PORT);
         //$this->redis = $redis;
+        $this->serverName = 'http://jiunonghuabao.com/';
     }
 
     /*
@@ -57,8 +58,8 @@ class Goods
             foreach ($bannerData as $banner) {
                 $data['url']   = (!empty($banner->url))?$banner->url:'';
                 $data['title'] = (!empty($banner->ad_name))?$banner->ad_name:'';
-                $data['path']  = (!empty($banner->content))? 'http://'.$_SERVER['SERVER_NAME'].'/'.$banner->content:'';
-                $banners[] = $data;
+                $data['path']  = (!empty($banner->content))?$this->serverName.$banner->content:'';
+                $banners[]     = $data;
             }
         }
         $res['data']['banners'] = $banners;
@@ -71,7 +72,7 @@ class Goods
 
         $ad['title'] = (!empty($adData->ad_name))?$adData->ad_name:'';
         $ad['url']   = (!empty($adData->ad_link))?$adData->ad_link:'';
-        $ad['path']  = (!empty($adData->ad_code))?'http://'.$_SERVER['SERVER_NAME'].'/data/afficheimg/'.$adData->ad_code:'';
+        $ad['path']  = (!empty($adData->ad_code))?$this->serverName.'data/afficheimg/'.$adData->ad_code:'';
         $res['data']['ad'] = $ad;
 
         // 商品数据
@@ -89,21 +90,21 @@ class Goods
             foreach ($goods_list as $goods)
             {
                 //echo $goods->goods_name;
-                $data['goods_id']  = $goods->goods_id;
-                $data['goods_img'] = (!empty($goods->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $goods->goods_img:'';
+                $data['goods_id']    = $goods->goods_id;
+                $data['goods_img']   = (!empty($goods->goods_img))?$this->serverName.$goods->goods_img:'';
                 $data['shop_price']  = $goods->shop_price;
                 $data['goods_name']  = $goods->goods_name;
-                $data['keywords']  = $goods->keywords;
+                $data['keywords']    = $goods->keywords;
                 $datas[] = $data;
             }
             //print_r($datas);
             if(count($datas)>0){
-                $res['errcode'] = '200';
-                $res['message'] = '商品获取成功！';
+                $res['errcode']       = '200';
+                $res['message']       = '商品获取成功！';
                 $res['data']['lists'] = $datas;
             }else{
-                $res['errcode'] = '2001';
-                $res['message'] = '商品数据为空！';
+                $res['errcode']       = '2001';
+                $res['message']       = '商品数据为空！';
                 $res['data']['lists'] = $datas;
             }
         }
@@ -111,7 +112,7 @@ class Goods
         if(!$goods_list && !$bannerData){ //如果banner和商品列表数据都为空
             $res['errcode'] = '1001';
             $res['message'] = '数据获取失败！';
-            $res['data'] = [];
+            $res['data']    = [];
         }
         $this->response($res);
     }
@@ -138,26 +139,26 @@ class Goods
             foreach ($goods_list as $goods)
             {
                 //echo $goods->goods_name;
-                $data['goods_id']  = $goods->goods_id;
-                $data['goods_img'] = (!empty($goods->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $goods->goods_img:'';
+                $data['goods_id']    = $goods->goods_id;
+                $data['goods_img']   = (!empty($goods->goods_img))?$this->serverName.$goods->goods_img:'';
                 $data['shop_price']  = $goods->shop_price;
                 $data['goods_name']  = $goods->goods_name;
-                $data['keywords']  = $goods->keywords;
+                $data['keywords']    = $goods->keywords;
                 $datas[] = $data;
             }
             if(count($datas)>0){
                 $res['errcode'] = '200';
                 $res['message'] = '商品列表获取成功';
-                $res['data'] = $datas;
+                $res['data']    = $datas;
             }else{
                 $res['errcode'] = '2001';
                 $res['message'] = '商品数据为空！';
-                $res['data'] = $datas;
+                $res['data']    = $datas;
             }
         }else{
             $res['errcode'] = '1001';
             $res['message'] = '商品列表获取失败！';
-            $res['data'] = [];
+            $res['data']    = [];
         }
         $this->response($res);
     }
@@ -186,27 +187,27 @@ class Goods
                 //print_r($commetns);
 
                 $info = $attr2value;
-                //$info['goods_thumb'] = (!empty($goods->goods_thumb))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_thumb:'';
-                $info['goods_img'] = (!empty($goods->goods_img))? 'http://' . $_SERVER['SERVER_NAME'] . '/' . $goods->goods_img:'';
+                //$info['goods_thumb'] = (!empty($goods->goods_thumb))?$this->serverName.$goods->goods_thumb:'';
+                $info['goods_img']     = (!empty($goods->goods_img))?$this->serverName.$goods->goods_img:'';
                 $info['market_price']  = $goods->market_price;
-                $info['shop_price']  = $goods->shop_price;
-                $info['goods_name']  = $goods->goods_name;
-                $info['keywords']  = $goods->keywords;
-                $info['goods_desc']  = $goods->goods_desc;
+                $info['shop_price']    = $goods->shop_price;
+                $info['goods_name']    = $goods->goods_name;
+                $info['keywords']      = $goods->keywords;
+                $info['goods_desc']    = $goods->goods_desc;
                 $info['goods_number']  = $goods->goods_number;
 
-                $res['data']['imgs'] = $imgs;
-                $res['data']['attrs'] = $info;
+                $res['data']['imgs']     = $imgs;
+                $res['data']['attrs']    = $info;
                 $res['data']['commetns'] = $commetns;
             }else{
                 $res['errcode'] = '1001';
                 $res['message'] = '获取商品信息失败！';
-                $res['data'] = [];
+                $res['data']    = [];
             }
         }else {
             $res['errcode'] = '1002';
             $res['message'] = '商品信息有误！';
-            $res['data'] = [];
+            $res['data']    = [];
         }
         $this->response($res);
     }
@@ -229,7 +230,7 @@ class Goods
 
             $attr2value = [];
             foreach($attrInfo as $attrid => $attrval){
-                $attr2value[$attrval] = isset($attrInfo2[$attrid])?$attrInfo2[$attrid]:'';
+                $attr2value[$attrval]    = isset($attrInfo2[$attrid])?$attrInfo2[$attrid]:'';
             }
         }else{
             $attr2value = [];
@@ -273,9 +274,9 @@ class Goods
             if($contents){
                 foreach ($contents as $content) {
                     $data['comment_id'] = $content->comment_id;
-                    $data['user_name'] = $content->user_name;
-                    $data['content'] = $content->content;
-                    $comments[] = $data;
+                    $data['user_name']  = $content->user_name;
+                    $data['content']    = $content->content;
+                    $comments[]         = $data;
                 }
             }
         }
@@ -297,20 +298,20 @@ class Goods
         if($goods){
             $datas = [];
             foreach($goods as $good){
-                $res['errcode'] = '200';
-                $res['message'] = '搜索商品成功！';
+                $res['errcode']      = '200';
+                $res['message']      = '搜索商品成功！';
 
-                $data['goods_id']  = $good->goods_id;
-                $data['goods_img'] = (!empty($good->goods_img))? 'http://'.$_SERVER['SERVER_NAME'].'/'. $good->goods_img:'';
+                $data['goods_id']    = $good->goods_id;
+                $data['goods_img']   = (!empty($good->goods_img))?$this->serverName.$good->goods_img:'';
                 $data['shop_price']  = $good->shop_price;
                 $data['goods_name']  = $good->goods_name;
-                $data['keywords']  = $good->keywords;
+                $data['keywords']    = $good->keywords;
             }
-            $res['data'] = $datas;
+            $res['data']             = $datas;
         }else{
             $res['errcode'] = '1001';
             $res['message'] = '搜索商品失败！';
-            $res['data'] = [];
+            $res['data']    = [];
         }
         $this->response($res);
     }
