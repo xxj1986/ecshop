@@ -561,6 +561,7 @@ switch($act){
     case 'chPwd': $auth->chPwd($request);          break;
     case 'chMobile': $auth->chMobile($request);    break;
     case 'uploadCulpture': $auth->uploadCulpture($request);    break;
+    case 'switchPattern': $auth->switchPattern($request);      break;
     case 'createCaptcha': $auth->createCaptcha();  break;
     default: $auth->response();
 }
