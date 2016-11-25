@@ -41,17 +41,17 @@ class Auth{
         $mobile = $request->input('mobile');
         $password = $request->input('password');
         //微信登录
-        $open_id = $request->input('open_id');
+        $openid = $request->input('openid');
         $accessToken = $request->input('accessToken');
         //获取微信用户信息
-        if($accessToken && $open_id){
-            $userInfo = json_decode( $this->getWechatUser($accessToken,$open_id), true);
+        if($accessToken && $openid){
+            $userInfo = json_decode( $this->getWechatUser($accessToken,$openid),true);
             $valid_openID = isset($userInfo['openid'])?$userInfo['openid']:'';
         }
         else $valid_openID = false;
         //获取用户信息
         if($valid_openID){
-            $user = DB::table('users')->where('open_id',$valid_openID)->first();
+            $user = DB::table('users')->where('openid',$valid_openID)->first();
         }else{
             $user = DB::table('users')->where('mobile_phone',$mobile)->where('password',md5($password))->first();
         }
@@ -70,7 +70,7 @@ class Auth{
                 'data'=>['user_id'=>$user->user_id,'token'=>$token,'pattern_on'=>$user->pattern_on,'open_id'=>$user->open_id ]
             ]);
         }else{
-            if($open_id)
+            if($openid)
                 $this->response(['errcode'=>2002,'message'=>'未找到对应注册用户','data'=>$this->obj ]);
             $this->response(['errcode'=>2002,'message'=>'账号或密码错误！','data'=>$this->obj ]);
         }
@@ -133,7 +133,7 @@ class Auth{
         $sex = intval($request->input('sex'));
         $age = intval($request->input('age'));
         $profession = $request->input('profession'); //职业
-        $openID = $request->input('openID');
+        $openid = $request->input('openid');
         $accessToken = $request->input('accessToken');
         /*
         $captcha = $request->input('captcha');
@@ -145,8 +145,8 @@ class Auth{
         if($captcha != $cap){
             $this->response(['errcode'=>2009,'message'=>'验证码错误','data'=>$this->obj ]);
         }*/
-        if($accessToken && $openID){
-            $userInfo = json_decode( $this->getWechatUser($accessToken,$openID), true);
+        if($accessToken && $openid){
+            $userInfo = json_decode( $this->getWechatUser($accessToken,$openid), true);
         } else {
             $code = $request->input('code');
             //检查验证码
@@ -198,7 +198,7 @@ class Auth{
             'sex' => isset($userInfo['sex']) ? $userInfo['sex'] : $sex,
             'age' => $age ? $age : '',
             'profession' => $profession ? $profession : '', //职业
-            'open_id' => isset($userInfo['openid']) ? $userInfo['openid'] : '',
+            'openid' => isset($userInfo['openid']) ? $userInfo['openid'] : '',
             'head_culpture' => isset($userInfo['headimgurl']) ? $userInfo['headimgurl'] : '',
         ];
         if($mobile) $data['mobile_phone'] = $mobile;
@@ -500,14 +500,15 @@ class Auth{
     }
 
     //验证微信用户
-    private function getWechatUser($accessToken,$openID){
-        $url = 'https://api.weixin.qq.com/sns/userinfo?access_token='.$accessToken.'&openid='.$openID;
+    private function getWechatUser($accessToken,$openid){
+        $url = 'https://api.weixin.qq.com/sns/userinfo?access_token='.$accessToken.'&openid='.$openid;
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_HEADER, 1);
+        curl_setopt($curl, CURLOPT_HEADER, 0); //不显示header
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE); // https请求 不验证证书
         //curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE); // https请求 不验证hosts
+        //curl_setopt($curl, CURLOPT_HTTPHEADER,['Content-Type: application/json']);
         $userInfo = curl_exec($curl);
         curl_close($curl);
         return $userInfo;
