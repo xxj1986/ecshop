@@ -40,10 +40,14 @@ class Auth{
         //获取用户名和密码
         $mobile = $request->input('mobile');
         $password = $request->input('password');
+        $open_id = $request->input('open_id');
         //获取用户信息
-        $user = DB::table('users')->where('mobile_phone',$mobile)->first();
-        //var_dump($user);die();
-        if( $user && md5($password) == $user->password ){
+        if($open_id){
+            $user = DB::table('users')->where('open_id',$open_id)->first();
+        }else{
+            $user = DB::table('users')->where('mobile_phone',$mobile)->where('password',md5($password))->first();
+        }
+        if($user){
             $token = str_random(32);
             //绑定user_id和device
             $this->redis->hset('id2dev', $user->user_id, $this->dev);
@@ -54,8 +58,12 @@ class Auth{
             //$this->db->table('users')->where('user_id',$user->user_id)->update(['last_login'=>time()]);
             DB::table('users')->where('user_id',$user->user_id)->update(['last_login'=>time()]);
             //返回user_id,token
-            $this->response(['errcode'=>200,'message'=>'登录成功','data'=>['user_id'=>$user->user_id,'token'=>$token,'pattern_on'=>$user->pattern_on ] ]);
+            $this->response(['errcode'=>200,'message'=>'登录成功',
+                'data'=>['user_id'=>$user->user_id,'token'=>$token,'pattern_on'=>$user->pattern_on,'open_id'=>$user->open_id ]
+            ]);
         }else{
+            if($open_id)
+                $this->response(['errcode'=>2002,'message'=>'未找到对应注册用户','data'=>$this->obj ]);
             $this->response(['errcode'=>2002,'message'=>'账号或密码错误！','data'=>$this->obj ]);
         }
     }
@@ -117,6 +125,9 @@ class Auth{
         $sex = intval($request->input('sex'));
         $age = intval($request->input('age'));
         $profession = $request->input('profession'); //职业
+        $open_id = $request->input('open_id');
+        $nikeName = $request->input('nikeName');
+        $head_culpture = $request->input('headPic');
         /*
         $captcha = $request->input('captcha');
         //检查验证码
@@ -127,30 +138,32 @@ class Auth{
         if($captcha != $cap){
             $this->response(['errcode'=>2009,'message'=>'验证码错误','data'=>$this->obj ]);
         }*/
-        $code = $request->input('code');
-        //检查验证码
-        if(!$code){
-            $this->response(['errcode'=>2008,'message'=>'请输入验证码','data'=>$this->obj ]);
-        }
-        $regCode = $this->redis->get('regCode'.$mobile);
-        if($code != $regCode){
-            //$this->response(['errcode'=>302,'message'=>'验证码不正确','data'=>$this->obj ]);
-        }
-        //检查手机号
-        if(!$mobile){
-            $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>$this->obj ]);
-        }
-        $match = "/1[3458]{1}\d{9}$/";
-        if(!preg_match($match, $mobile)){
-            $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>$this->obj ]);
-        }
-        $userInfo = DB::table('users')->where('mobile_phone',$mobile)->first();
-        if($userInfo){
-            $this->response(['errcode'=>2006,'message'=>'该手机号已注册','data'=>$this->obj ]);
-        }
-        //检查密码
-        if(!$password){
-            $this->response(['errcode'=>2007,'message'=>'请输入密码','data'=>$this->obj ]);
+        if(!$open_id){
+            $code = $request->input('code');
+            //检查验证码
+            if(!$code){
+                $this->response(['errcode'=>2008,'message'=>'请输入验证码','data'=>$this->obj ]);
+            }
+            $regCode = $this->redis->get('regCode'.$mobile);
+            if($code != $regCode){
+                //$this->response(['errcode'=>302,'message'=>'验证码不正确','data'=>$this->obj ]);
+            }
+            //检查手机号
+            if(!$mobile){
+                $this->response(['errcode'=>2004,'message'=>'请输入手机号','data'=>$this->obj ]);
+            }
+            $match = "/1[3458]{1}\d{9}$/";
+            if(!preg_match($match, $mobile)){
+                $this->response(['errcode'=>2005,'message'=>'手机号不正确','data'=>$this->obj ]);
+            }
+            $userInfo = DB::table('users')->where('mobile_phone',$mobile)->first();
+            if($userInfo){
+                $this->response(['errcode'=>2006,'message'=>'该手机号已注册','data'=>$this->obj ]);
+            }
+            //检查密码
+            if(!$password){
+                $this->response(['errcode'=>2007,'message'=>'请输入密码','data'=>$this->obj ]);
+            }
         }
         /*
         // 存redis并设置过期时间
@@ -170,12 +183,14 @@ class Auth{
             'question' => '',
             'answer' => '',
             'last_ip' => '',
-            'alias' => '', //昵称
+            'alias' => $nikeName, //昵称
             'mobile_phone' => '', //手机号
             'credit_line' => 800000, // 最大消费
             'sex' => $sex,
             'age' => $age ? $age : '',
             'profession' => $profession ? $profession : '', //职业
+            'open_id' => $open_id,
+            'head_culpture' => $head_culpture,
         ];
         $data['mobile_phone'] = $mobile;
         $data['password'] = md5($password);
