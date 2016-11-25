@@ -46,12 +46,15 @@ class Auth{
         //获取微信用户信息
         if($accessToken && $openid){
             $userInfo = json_decode( $this->getWechatUser($accessToken,$openid),true);
-            $valid_openID = isset($userInfo['openid'])?$userInfo['openid']:'';
+            $valid_openID = isset($userInfo['openid']) ? $userInfo['openid'] : false;
         }
         else $valid_openID = false;
         //获取用户信息
         if($valid_openID){
             $user = DB::table('users')->where('openid',$valid_openID)->first();
+            if(!$user){ //如果不存在微信用户，则直接注册
+                $this->register($request);
+            }
         }else{
             $user = DB::table('users')->where('mobile_phone',$mobile)->where('password',md5($password))->first();
         }
@@ -502,6 +505,21 @@ class Auth{
         }else{
             $this->response(['errcode'=>300,'message'=>'请上传图片','data'=>$this->obj ]);
         }
+    }
+
+    /*
+     * 开启/关闭手势密码
+     */
+    public function switchPattern(Request $request){
+        $pattern = $request->input('pattern');
+        $user_id = intval($request->input('user_id'));
+        $pattern_on = ($pattern == 'on') ? 'on' : 'off';
+        $message = ($pattern == 'on') ? '开启手势密码验证' : '关闭手势密码验证';
+        $res = DB::table('users')->where('user_id',$user_id)->update(compact('pattern_on'));
+        if($res)
+            $this->response(['errcode'=>200,'message'=>$message.'成功','data'=>compact('pattern_on') ]);
+
+        $this->response(['errcode'=>300,'message'=>$message.'失败','data'=>$this->obj ]);
     }
 
     //验证微信用户
