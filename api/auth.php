@@ -67,7 +67,7 @@ class Auth{
             DB::table('users')->where('user_id',$user->user_id)->update(['last_login'=>time()]);
             //返回user_id,token
             $this->response(['errcode'=>200,'message'=>'登录成功',
-                'data'=>['user_id'=>$user->user_id,'token'=>$token,'pattern_on'=>$user->pattern_on,'open_id'=>$user->open_id ]
+                'data'=>['user_id'=>$user->user_id,'token'=>$token,'pattern_on'=>$user->pattern_on,'openid'=>$user->openid ]
             ]);
         }else{
             if($openid)
@@ -147,6 +147,11 @@ class Auth{
         }*/
         if($accessToken && $openid){
             $userInfo = json_decode( $this->getWechatUser($accessToken,$openid), true);
+            $valid_openID = $userInfo['openid'];
+            $userInfo = DB::table('users')->where('openid',$valid_openID)->first();
+            if($userInfo){
+                $this->login($request);
+            }
         } else {
             $code = $request->input('code');
             //检查验证码
