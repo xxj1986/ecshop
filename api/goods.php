@@ -309,7 +309,7 @@ class Goods
                 $data['goods_id']    = $good->goods_id;
                 $data['goods_img']   = (!empty($good->goods_img))?$this->serverName.$good->goods_img:'';
                 $data['shop_price']  = $good->shop_price;
-                $data['market_price']= $good->shop_price;
+                $data['market_price']= $good->market_price;
                 $data['goods_name']  = $good->goods_name;
                 $data['keywords']    = $good->keywords;
                 $datas[]             = $data;
