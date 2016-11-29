@@ -240,6 +240,9 @@ switch ($act) {
     case 'delete_cart':
         $Order->delete_cart($request);
         break;
+    case 'addOrder':
+        $Order->addOrder($request);
+        break;
     default:
         $Order->response();
 }
