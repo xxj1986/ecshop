@@ -119,28 +119,35 @@ class Order
 
     /**
      * 更新购物车信息
+     * 参数格式为 /api/order.php?act=update_cart&id=5,6,7&nums=699,676,888
      */
     public function update_cart(Request $request){
-        $goods_id = $request->input('id') ? $request->input('id') : 0;
-        if ($goods_id > 0) {
-            $attrs = DB::table('goods_attr')
-                ->where('goods_id', $goods_id)
-                ->select('goods_id', 'attr_id', 'attr_value', 'attr_price')
-                ->get();
-            //print_r($goods);
-            if ($attrs) {
-                $res['errcode'] = '200';
-                $res['message'] = '获取商品属性信息成功！';
-                $res['data'] = $attrs;
-            } else {
-                $res['errcode'] = '1001';
-                $res['message'] = '获取商品属性信息失败！';
-                $res['data'] = [];
-            }
+        $goods_ids = $request->input('id') ? $request->input('id') : [];
+        $goods_nums = $request->input('nums') ? $request->input('nums') : [];
+        $idarrs = explode(',',$goods_ids);
+        $noarrs = explode(',',$goods_nums);
+        $idcounts = count($idarrs);
+        $nocounts = count($noarrs);
+        if ($idcounts == 0 || $nocounts == 0 || $idcounts != $nocounts) {
+            $res['errcode'] = '202';
+            $res['message'] = '购物车信息有误！';
+            $res['data']    = [];
         } else {
-            $res['errcode'] = '1002';
-            $res['message'] = '商品信息有误！';
-            $res['data'] = [];
+            $res['errcode'] = '200';
+            $res['message'] = '更新购物车信息成功！';
+            $res['data']    = [];
+            for($i = 0; $i < $idcounts; $i++){
+                $cid = $idarrs[$i];
+                $num = $noarrs[$i];
+                $state = DB::table('cart')
+                    ->where('rec_id',$cid)
+                    ->update(['goods_number' => $num]);
+
+                if(!$state){
+                    $res['errcode'] = '201';
+                    $res['message'] = '更新购物车信息失败！';
+                }
+            }
         }
         $this->response($res);
     }
@@ -165,7 +172,7 @@ class Order
         $this->response($res);
     }
 
-    /*
+    /**
      * 添加订单信息
      */
     public function addOrder(Request $request){
@@ -234,7 +241,7 @@ switch ($act) {
     case 'get_cart_infos':
         $Order->get_cart_infos($request);
         break;
-    case 'update_cart_infos':
+    case 'update_cart':
         $Order->update_cart($request);
         break;
     case 'delete_cart':
