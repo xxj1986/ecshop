@@ -122,13 +122,15 @@ class Order
      * 参数格式为 /api/order.php?act=update_cart&id=5,6,7&nums=699,676,888
      */
     public function update_cart(Request $request){
-        $goods_ids = $request->input('id') ? $request->input('id') : [];
-        $goods_nums = $request->input('nums') ? $request->input('nums') : [];
+        $goods_ids = $request->input('id') ? $request->input('id') :'';
+        $goods_nums = $request->input('nums') ? $request->input('nums') :'';
         $idarrs = explode(',',$goods_ids);
         $noarrs = explode(',',$goods_nums);
+        //var_dump($idarrs);
         $idcounts = count($idarrs);
         $nocounts = count($noarrs);
-        if ($idcounts == 0 || $nocounts == 0 || $idcounts != $nocounts) {
+        //var_dump($idcounts);
+        if ($goods_ids == '' || $goods_nums == '' || $idcounts != $nocounts) {
             $res['errcode'] = '202';
             $res['message'] = '购物车信息有误！';
             $res['data']    = [];
