@@ -295,7 +295,7 @@ class Goods
         $goods_name = $request->input('name')?$request->input('name'):'红酒';
         $goods = DB::table('goods')
             ->where('goods_name','like','%'.$goods_name.'%')  //where('name', 'like', 'T%')
-            ->select('goods_id','goods_name','shop_price','keywords','goods_img')
+            ->select('goods_id','goods_name','market_price','shop_price','keywords','goods_img')
             ->orderBy('goods_id','ASC')
             ->take(10)
             ->get();
@@ -309,6 +309,7 @@ class Goods
                 $data['goods_id']    = $good->goods_id;
                 $data['goods_img']   = (!empty($good->goods_img))?$this->serverName.$good->goods_img:'';
                 $data['shop_price']  = $good->shop_price;
+                $data['market_price']= $good->shop_price;
                 $data['goods_name']  = $good->goods_name;
                 $data['keywords']    = $good->keywords;
                 $datas[]             = $data;
