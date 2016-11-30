@@ -1,0 +1,22 @@
+*{ margin:0; padding:0; color:#5d5d5d; font-size:13px; font-family:"微软雅黑";}
+img{ border:none}
+h1,h2,h3{ font-weight:normal}
+html{position:relative;}
+body{margin:0; padding:0;background: #fff;}
+li{ list-style:none}
+a{ text-decoration:none}
+a:hover{ text-decoration:underline; color:#e94543; cursor:pointer}
+.zong_width{ width:1000px; margin:0 auto;}
+input{outline:none;}
+.leftt{ float:left; }
+.rightt{ float:right;}
+.clearfix:after {content: " " ;display: block ;height: 0 ;clear: both ;visibility: hidden ;}
+.clearfix{ display: inline-block; }
+/* Hides from IE-mac \*/*html .clearfix{ height:1%; }.clearfix{ display:block; }/* End hide from IE-mac \}*/
+
+.weix{position: absolute;left: 0;top: 78%;}
+.d{margin: 0 auto;display: block;}
+.overflow{
+	height: 100%;
+	overflow: hidden;
+}
