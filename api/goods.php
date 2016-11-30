@@ -121,13 +121,18 @@ class Goods
      * 获取产品列表信息
      */
     public function get_goods_lists(Request $request){
-        $cat_id = $request->input('cat_id')?$request->input('cat_id'):1;
+        $cat_id = $request->input('cat_id')?$request->input('cat_id'):0;
         $record = $request->input('record')?$request->input('record'):10;
         $page = $request->input('page')?$request->input('page'):1;
 
+        if($cat_id>0){
+            $catQuery = '=';
+        }else{
+            $catQuery = '>';
+        }
         $goods_list = DB::table('goods')
             ->where('is_delete',0)
-            ->where('cat_id',$cat_id)
+            ->where('cat_id',$catQuery,$cat_id)
             ->select('goods_id','goods_name','shop_price','keywords','goods_img')
             ->orderBy('goods_id','ASC')
             ->skip($record * ($page-1))->take($record)
@@ -287,10 +292,10 @@ class Goods
      * 获取商品对应的属性信息
      */
     public function get_search(Request $request){
-        $goods_name = $request->input('word')?$request->input('word'):'红酒';
+        $goods_name = $request->input('name')?$request->input('name'):'红酒';
         $goods = DB::table('goods')
             ->where('goods_name','like','%'.$goods_name.'%')  //where('name', 'like', 'T%')
-            ->select('goods_id','goods_name','shop_price','keywords','goods_img')
+            ->select('goods_id','goods_name','market_price','shop_price','keywords','goods_img')
             ->orderBy('goods_id','ASC')
             ->take(10)
             ->get();
@@ -304,8 +309,10 @@ class Goods
                 $data['goods_id']    = $good->goods_id;
                 $data['goods_img']   = (!empty($good->goods_img))?$this->serverName.$good->goods_img:'';
                 $data['shop_price']  = $good->shop_price;
+                $data['market_price']= $good->market_price;
                 $data['goods_name']  = $good->goods_name;
                 $data['keywords']    = $good->keywords;
+                $datas[]             = $data;
             }
             $res['data']             = $datas;
         }else{
