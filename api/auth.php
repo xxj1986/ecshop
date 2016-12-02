@@ -511,6 +511,7 @@ class Auth{
      * 开启/关闭手势密码
      */
     public function switchPattern(Request $request){
+        //获取输入信息
         $pattern = $request->input('pattern');
         $user_id = intval($request->input('user_id'));
         $pattern_on = ($pattern == 'on') ? 'on' : 'off';
